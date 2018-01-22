@@ -77,9 +77,9 @@ bool ModelLoader::LoadOBJ(const char *filePath,
 			else if (strcmp(line, "f") == 0)//face
 			{
 				unsigned int vIndex[3], uvIndex[3], nIndex[3];
-				int matches = fscanf(file, "%d/%d/%d ", &vIndex[0], &vIndex[1], &vIndex[2]);
-				matches += fscanf(file, "%d/%d/%d ", &uvIndex[0], &uvIndex[1], &uvIndex[2]);
-				matches += fscanf(file, "%d/%d/%d\n", &nIndex[0], &nIndex[1], &nIndex[2]);
+				int matches = fscanf(file, "%d/%d/%d ", &vIndex[0], &uvIndex[0], &nIndex[0]);
+				matches += fscanf(file, "%d/%d/%d ", &vIndex[1], &uvIndex[1], &nIndex[1]);
+				matches += fscanf(file, "%d/%d/%d\n", &vIndex[2], &uvIndex[2], &nIndex[2]);
 
 				if (matches != 9)
 				{
@@ -101,25 +101,29 @@ bool ModelLoader::LoadOBJ(const char *filePath,
 				normalIndices.push_back(nIndex[2]);
 			}
 		}
+	}
 
-		for (unsigned int i = 0; i < vertexIndices.size(); i++)
+	for (unsigned int i = 0; i < vertexIndices.size(); i++)
+	{
+		if (i == 12)
 		{
-			unsigned int vIndex = vertexIndices[i];
-			vec3 vert = temp_vertices[vIndex - 1];
-			out_vertices.push_back(vert);
+			int j = 0;
 		}
-		for (unsigned int i = 0; i < uvIndices.size(); i++)
-		{
-			unsigned int uvIndex = uvIndices[i];
-			vec2 uv = temp_uvs[uvIndex - 1];
-			out_uvs.push_back(uv);
-		}
-		for (unsigned int i = 0; i < normalIndices.size(); i++)
-		{
-			unsigned int nIndex = normalIndices[i];
-			vec3 normal = temp_normals[nIndex - 1];
-			out_normals.push_back(normal);
-		}
+		unsigned int vIndex = vertexIndices[i];
+		vec3 vert = temp_vertices[vIndex - 1];
+		out_vertices.push_back(vert);
+	}
+	for (unsigned int i = 0; i < uvIndices.size(); i++)
+	{
+		unsigned int uvIndex = uvIndices[i];
+		vec2 uv = temp_uvs[uvIndex - 1];
+		out_uvs.push_back(uv);
+	}
+	for (unsigned int i = 0; i < normalIndices.size(); i++)
+	{
+		unsigned int nIndex = normalIndices[i];
+		vec3 normal = temp_normals[nIndex - 1];
+		out_normals.push_back(normal);
 	}
 
 	return true;

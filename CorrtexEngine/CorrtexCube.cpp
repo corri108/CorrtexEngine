@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CorrtexCube.h"
 #include "SimpleUV.h"
+#include "GameEngine.h"
 
 CorrtexCube::CorrtexCube() :
 	CorrtexCube(vec3(0), 1)
@@ -120,6 +121,13 @@ CorrtexCube::CorrtexCube(vec3 pos, float size)
 	this->name = "CorrtexCube Instance";
 	this->UVBufferData = SimpleUV::GetCubeUVData();
 	this->UVCoordCount = this->vertexCount;
+
+
+	if (GameEngine::initLoaded)
+	{
+		//we need to initialize now instead of later
+		this->Initialize();
+	}
 }
 
 CorrtexCube::~CorrtexCube()

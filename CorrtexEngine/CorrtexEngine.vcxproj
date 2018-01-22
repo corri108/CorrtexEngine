@@ -173,7 +173,7 @@
     <ClInclude Include="CorrtexDebug.h" />
     <ClInclude Include="CorrtexDelegate.h" />
     <ClInclude Include="CorrtexFPSCamera.h" />
-    <ClInclude Include="CorrtexGame.h" />
+    <ClInclude Include="CorrtexMesh.h" />
     <ClInclude Include="CorrtexObject.h" />
     <ClInclude Include="CorrtexPrimitive.h" />
     <ClInclude Include="CorrtexQuad.h" />
@@ -197,7 +197,7 @@
     <ClCompile Include="CorrtexDelegate.cpp" />
     <ClCompile Include="CorrtexEngine.cpp" />
     <ClCompile Include="CorrtexFPSCamera.cpp" />
-    <ClCompile Include="CorrtexGame.cpp" />
+    <ClCompile Include="CorrtexMesh.cpp" />
     <ClCompile Include="CorrtexObject.cpp" />
     <ClCompile Include="CorrtexPrimitive.cpp" />
     <ClCompile Include="CorrtexQuad.cpp" />
@@ -216,6 +216,8 @@
     <ClCompile Include="GameEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DiffuseFragmentShader.fragmentshader" />
+    <None Include="DiffuseVertexShader.vertexshader" />
     <None Include="raymarch.vertexshader" />
     <None Include="raymarchfrag.fragmentshader" />
     <None Include="SimpleFragmentShader.fragmentshader" />

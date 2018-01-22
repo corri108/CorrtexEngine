@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CorrtexObject.h"
-#include "CorrtexGame.h"
-
+#include "GameEngine.h"
 
 CorrtexObject::CorrtexObject() :
 	CorrtexObject(vec3(0), "CorrtexObject Instance")
@@ -19,7 +18,7 @@ CorrtexObject::CorrtexObject(vec3 pos, char* name)
 	this->pitch = 0.0f;
 	this->roll = 0.0f;
 	this->name = name;
-	CorrtexGame::objectList->Add(this);
+	GameEngine::objectList->Add(this);
 }
 
 CorrtexObject::~CorrtexObject()

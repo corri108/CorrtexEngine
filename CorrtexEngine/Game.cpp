@@ -2,6 +2,7 @@
 #include "Game.h"
 
 LinkedList<CorrtexObject*> *seperateList = new LinkedList<CorrtexObject*>();
+CorrtexMesh *mesh = NULL;
 
 Game::Game()
 {
@@ -33,14 +34,23 @@ void Game::Init()
 	//make floor, ceiling
 	CorrtexQuad *quad = new CorrtexQuad(vec3(0, -0.001f, 0), 1.0f);
 	CorrtexQuad *quad2 = new CorrtexQuad(vec3(0, 10.001f, 0), 1.0f);
+
+	CorrtexTetrahedron * tet = new CorrtexTetrahedron(vec3(1, 2, 0), 1.0f);
+	mesh = new CorrtexMesh(vec3(-2, 0, 0), "Assets/teapot.obj");
+	mesh->SetScale(0.3f);
 }
 
-void Game::Update(float t)
+void Game::Update(float time, int frame)
 {
 	int c = seperateList->Count();
 
 	for (int i = 0; i < c; ++i)
 	{
-		seperateList->Get(i)->position = seperateList->Get(i)->startingPosition + vec3(0, sin(t), 0);
+		seperateList->Get(i)->position = seperateList->Get(i)->startingPosition + vec3(0, sin(time), 0);
+	}
+
+	if (frame % 50 == 0)
+	{
+		CorrtexCube *c = new CorrtexCube(vec3(sin(time) * 4, -cos(time / 8) * 4, cos(time) * 4), 0.75f);
 	}
 }

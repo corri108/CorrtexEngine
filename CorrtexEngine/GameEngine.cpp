@@ -1,6 +1,13 @@
 #include "stdafx.h"
 #include "GameEngine.h"
 
+//static shite
+LinkedList<CorrtexObject*> *GameEngine::objectList = NULL;
+CorrtexFPSCamera *GameEngine::camera = NULL;
+InputManager *GameEngine::input = NULL;
+ModelLoader *GameEngine::modelLoader = NULL;
+BMPLoader *GameEngine::imageLoader = NULL;
+bool GameEngine::initLoaded = false;
 
 GameEngine::GameEngine()
 {
@@ -11,6 +18,13 @@ GameEngine::~GameEngine()
 {
 }
 
+//helper functions! (mostly static)
+void GameEngine::LoadModel(const char *filePath, std::vector<vec3> &out_verts, std::vector<vec2> &out_uvs, std::vector<vec3> &out_norms)
+{
+	modelLoader->LoadOBJ(filePath, out_verts, out_uvs, out_norms);
+}
+
+//very internal functions
 GLFWwindow* GameEngine::WindowInit(int w, int h, char windowTitle[], bool fullscreen)
 {
 	if (glfwInit() != GLFW_TRUE)
@@ -133,6 +147,7 @@ GLuint GameEngine::LoadShaders(const char * vertex_file_path, const char * fragm
 	return ProgramID;
 }
 
+//regular internal functions
 void GameEngine::SetUserFunc(CorrtexFunc userInit, CorrtexFuncf userUpdate)
 {
 	this->UserInit = userInit;
@@ -145,19 +160,23 @@ void GameEngine::Init()
 
 	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
-	CorrtexGame::objectList = new LinkedList<CorrtexObject*>();
+	objectList = new LinkedList<CorrtexObject*>();
 	//camera, input & model view projection matrix handle
 	camera = new CorrtexFPSCamera(0.01f, 500.0f, aspectRatio, 50.0f);
 	input = new InputManager(window);
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
+	modelLoader = new ModelLoader();
+	imageLoader = new BMPLoader();
 
 	UserInit();
 
-	int c = CorrtexGame::objectList->Count();
+	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
-		CorrtexGame::objectList->Get(i)->Initialize();
+		objectList->Get(i)->Initialize();
 	}
+
+	initLoaded = true;
 }
 
 void GameEngine::Update()
@@ -165,18 +184,17 @@ void GameEngine::Update()
 	input->UpdateFirst();
 	camera->Update(time, *input);
 
-	int c = CorrtexGame::objectList->Count();
+	UserUpdate(time, frame);
+
+	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
-		CorrtexGame::objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
+		objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
 	}
 }
 
 void GameEngine::Draw()
 {
-	Update();
-	UserUpdate(this->time);
-
 	glClearColor(0.4f, 0.6f, 0.8f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -185,16 +203,17 @@ void GameEngine::Draw()
 
 	//camera->Update(time, *input);
 
-	int c = CorrtexGame::objectList->Count();
+	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
-		CorrtexGame::objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
+		objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
 	}
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 
 	time += timeStep;
+	frame++;
 
 	input->UpdateLast();
 

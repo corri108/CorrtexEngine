@@ -1,5 +1,5 @@
 #pragma once
-#include "CorrtexGame.h"
+#include "GameEngine.h"
 
 class Game
 {
@@ -7,6 +7,6 @@ public:
 	Game();
 	~Game();
 	static void Init();
-	static void Update(float t);
+	static void Update(float time, int frame);
 };
 

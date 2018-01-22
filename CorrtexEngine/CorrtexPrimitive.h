@@ -1,5 +1,4 @@
 #pragma once
-
 #include "CorrtexObject.h"
 
 class CorrtexPrimitive : public CorrtexObject

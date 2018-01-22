@@ -81,9 +81,6 @@
     <ClInclude Include="CorrtexFPSCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CorrtexGame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CorrtexRandom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -106,6 +103,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CorrtexMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,9 +137,6 @@
     <ClCompile Include="CorrtexRandom.cpp">
       <Filter>Source Files\Engine\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="CorrtexGame.cpp">
-      <Filter>Source Files\Engine\Game</Filter>
-    </ClCompile>
     <ClCompile Include="CorrtexEngine.cpp">
       <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
@@ -158,13 +155,16 @@
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderUniform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CorrtexQuad.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Engine\Objects\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderUniform.cpp">
+      <Filter>Source Files\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="GameEngine.cpp">
+      <Filter>Source Files\Engine\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="CorrtexMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,6 +185,12 @@
       <Filter>Source Files\Engine\Shaders</Filter>
     </None>
     <None Include="TexturedVertexShader.vertexshader">
+      <Filter>Source Files\Engine\Shaders</Filter>
+    </None>
+    <None Include="DiffuseVertexShader.vertexshader">
+      <Filter>Source Files\Engine\Shaders</Filter>
+    </None>
+    <None Include="DiffuseFragmentShader.fragmentshader">
       <Filter>Source Files\Engine\Shaders</Filter>
     </None>
   </ItemGroup>
