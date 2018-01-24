@@ -41,6 +41,8 @@ public:
 	float aspectRatio = width / height;
 	static bool initLoaded;
 	static int lightCount;
+	static bool showFPS;
+	static bool wireframeOn;
 	//important members
 	static LinkedList<CorrtexObject*> *objectList;
 	static LinkedList<CorrtexLight*> *lights;
@@ -67,6 +69,9 @@ protected:
 	void Init();
 	void Update();
 	void Draw();
+	void FPSCounter();
+	double fpsLastTime = 0.0;
+	int fpsFrameNum = 0;
 	//very internal
 	GLFWwindow* WindowInit(int w, int h, char windowTitle[], bool fullscreen);
 };

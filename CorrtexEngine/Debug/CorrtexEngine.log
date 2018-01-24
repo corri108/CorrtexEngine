@@ -1,3 +1,19 @@
 ﻿  GameEngine.cpp
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(162): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(182): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
+  Compiling...
+  CorrtexEngine.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  CorrtexTetrahedron.cpp
+  CorrtexQuad.cpp
+  CorrtexDelegate.cpp
+  ShaderUniform.cpp
+  Game.cpp
+  CorrtexShader.cpp
+  CorrtexPrimitive.cpp
+  CorrtexObject.cpp
+  CorrtexMesh.cpp
+  CorrtexLight.cpp
+  CorrtexCube.cpp
   CorrtexEngine.vcxproj -> C:\Users\socce\Documents\C++ Projects\CorrtexEngine\Debug\CorrtexEngine.exe

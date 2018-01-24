@@ -68,7 +68,7 @@ void Game::Init()
 	}
 
 	CorrtexMaterial *testMat = new CorrtexMaterial(0.1f, 0.2f, vec3(0.9f, 0.11f, 0.33f));
-	CorrtexMaterial *terrainGrassMaterial = new CorrtexMaterial(0.1f, 0.2f, vec3(93.0f / 255.0f, 112.0f / 255.0f, 33.0f / 255.0f));
+	CorrtexMaterial *terrainGrassMaterial = new CorrtexMaterial(0.025f, 0.82f, vec3(186.0f / 255.0f, 224.0f / 255.0f, 66.0f / 255.0f));
 	terrainGrassMaterial->uvScale = vec2(25);
 	//test mesh
 	mesh = new CorrtexMesh(vec3(-3, 1.22f, 0), "Assets/crate.obj");
@@ -80,7 +80,7 @@ void Game::Init()
 	CorrtexMesh* mesh2 = new CorrtexMesh(vec3(0, 0, 0), "Assets/terrain.obj");
 	mesh2->SetScale(0.5f);
 	mesh2->AddTexture("Assets/grass.bmp");
-	mesh2->SetShader(LODshader);
+	mesh2->SetShader(phongShader);
 	mesh2->SetMaterial(terrainGrassMaterial);
 	mesh2->scale = vec3(2, 1, 2);
 }

@@ -11,6 +11,8 @@ BMPLoader *GameEngine::imageLoader = NULL;
 CorrtexLight *GameEngine::light1 = NULL;
 bool GameEngine::initLoaded = false;
 int GameEngine::lightCount = 0;
+bool GameEngine::showFPS = true;
+bool GameEngine::wireframeOn = false;
 
 GameEngine::GameEngine()
 {
@@ -157,6 +159,24 @@ void GameEngine::SetUserFunc(CorrtexFunc userInit, CorrtexFuncf userUpdate)
 	this->UserUpdate = userUpdate;
 }
 
+void GameEngine::FPSCounter()
+{
+	// Measure speed
+	double currentTime = glfwGetTime();
+	fpsFrameNum++;
+	if (currentTime - fpsLastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+										 // printf and reset timer
+		double msecPerFrame = 1000.0 / double(fpsFrameNum);
+		//printf("%f ms/frame\n", msecPerFrame);
+		double fps = (1 / msecPerFrame) * 1000.0;
+		printf("FPS: %f\n", fps);
+		fpsFrameNum = 0;
+		fpsLastTime += 1.0;
+	}
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
 void GameEngine::Init()
 {
 	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
@@ -169,10 +189,12 @@ void GameEngine::Init()
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
 	modelLoader = new ModelLoader();
 	imageLoader = new BMPLoader();
-	light1 = new CorrtexLight(vec4(0, 4, 0, 1), 5* vec3(1, 0, 1));//red point light
-	CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 1 * vec3(0, 0, 1));//blue spot light
-	light2->coneAngle = 45.0f;
-	CorrtexLight *light3 = new CorrtexLight(vec4(1, 5, 2, 0), 1 * vec3(1, 1, 1));//white directional light
+	light1 = new CorrtexLight(vec4(5, 4, 0, 0), 0.08f * vec3(1, 1, 1));
+	fpsLastTime = glfwGetTime();
+	fpsFrameNum = 0;
+	//CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 1 * vec3(0, 0, 1));//blue spot light
+	//light2->coneAngle = 45.0f;
+	//CorrtexLight *light3 = new CorrtexLight(vec4(1, 5, 2, 0), 1 * vec3(1, 1, 1));//white directional light
 
 
 	UserInit();
@@ -202,6 +224,7 @@ void GameEngine::Update()
 
 void GameEngine::Draw()
 {
+	this->FPSCounter();
 	glClearColor(0.4f, 0.6f, 0.8f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
