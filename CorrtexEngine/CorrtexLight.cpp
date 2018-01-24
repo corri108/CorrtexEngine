@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CorrtexLight.h"
+#include "GameEngine.h"
 
 
 CorrtexLight::CorrtexLight():
@@ -13,6 +14,8 @@ CorrtexLight::CorrtexLight(vec4 pos, vec3 col)
 	this->lightPosition = pos;
 	this->lightColor = col;
 	this->SetScale(0.05f);
+	GameEngine::lightCount++;
+	GameEngine::lights->Add(this);
 }
 
 

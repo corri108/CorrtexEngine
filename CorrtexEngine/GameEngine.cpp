@@ -3,12 +3,14 @@
 
 //static shite
 LinkedList<CorrtexObject*> *GameEngine::objectList = NULL;
+LinkedList<CorrtexLight*> *GameEngine::lights = NULL;
 CorrtexFPSCamera *GameEngine::camera = NULL;
 InputManager *GameEngine::input = NULL;
 ModelLoader *GameEngine::modelLoader = NULL;
 BMPLoader *GameEngine::imageLoader = NULL;
 CorrtexLight *GameEngine::light1 = NULL;
 bool GameEngine::initLoaded = false;
+int GameEngine::lightCount = 0;
 
 GameEngine::GameEngine()
 {
@@ -160,14 +162,18 @@ void GameEngine::Init()
 	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 	objectList = new LinkedList<CorrtexObject*>();
+	lights = new LinkedList<CorrtexLight*>();
 	//camera, input & model view projection matrix handle
 	camera = new CorrtexFPSCamera(0.01f, 500.0f, aspectRatio, 50.0f);
 	input = new InputManager(window);
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
 	modelLoader = new ModelLoader();
 	imageLoader = new BMPLoader();
-	light1 = new CorrtexLight(vec4(1, 5, 2, 0), 1 * vec3(1, 1, 1));
-	//light1->lightColor = vec3(0.15f, 0.15f, 0.15f);
+	light1 = new CorrtexLight(vec4(0, 4, 0, 1), 5* vec3(1, 0, 1));//red point light
+	CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 8 * vec3(0, 0, 1));//blue spot light
+	light2->coneAngle = 45.0f;
+	CorrtexLight *light3 = new CorrtexLight(vec4(1, 5, 2, 0), 1 * vec3(1, 1, 1));//white directional light
+
 
 	UserInit();
 

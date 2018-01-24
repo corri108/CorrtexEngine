@@ -25,16 +25,17 @@ void Game::Init()
 	CorrtexShader *phongShader = new CorrtexShader("PhongVertexShader.vertexshader", "PhongFragmentShader.fragmentshader");
 	phongShader->AddAttributes(VERTEX, UV, NORMAL);
 	phongShader->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
-	phongShader->AddUniforms(Float4, "light.pos", Float3, "light.color", Float1, "light.attenuation");
-	phongShader->AddUniforms(Float1, "light.coneAngle", Float3, "light.coneDirection");
+	phongShader->AddUniformsArray(Float4, "allLights", "pos", Float3, "allLights", "color", Float1, "allLights", "attenuation");
+	phongShader->AddUniformsArray(Float1, "allLights", "coneAngle", Float3, "allLights", "coneDirection");
 	phongShader->AddUniforms(Float3, "cameraPosition", Float3, "specularColor", Float1, "shininess");
-	phongShader->AddUniforms(Float1, "ambientIntensity", Float2, "texRatio");
+	phongShader->AddUniforms(Float1, "ambientIntensity", Float2, "texRatio", Float1, "numLights");
 	//test diffuse shader
 	CorrtexShader *diffuseShader = new CorrtexShader("DiffuseVertexShader.vertexshader", "DiffuseFragmentShader.fragmentshader");
 	diffuseShader->AddAttributes(VERTEX, UV, NORMAL);
 	diffuseShader->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
-	diffuseShader->AddUniforms(Float4, "light.pos", Float3, "light.color", Float2, "texRatio");
-	diffuseShader->AddUniforms(Float1, "ambientIntensity", Float1, "light.coneAngle", Float3, "light.coneDirection");
+	diffuseShader->AddUniformsArray(Float4, "allLights", "pos", Float3, "allLights", "color", Float1, "allLights", "attenuation");
+	diffuseShader->AddUniformsArray(Float1, "allLights", "coneAngle", Float3, "allLights", "coneDirection");
+	diffuseShader->AddUniforms(Float2, "texRatio", Float1, "ambientIntensity", Float1, "numLights");
 	//test texture shader
 	CorrtexShader *textureShader = new CorrtexShader("TexturedVertexShader.vertexshader", "TexturedFragmentShader.fragmentshader");
 	textureShader->AddAttributes(VERTEX, UV);

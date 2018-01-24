@@ -58,92 +58,113 @@ void CorrtexMesh::SetShaderValues(mat4 mvp)
 		ShaderUniform* su = tempList.Get(i);
 		char* attribName = su->glslName;
 
-		switch (su->uniformType)
+		if (su->valueInArray)//is this an array param?
 		{
-		case Matrix4x4:
-			if (attribName == "MVP")
+			if (su->arrayStructName == "allLights")//for lights
 			{
-				su->SetValue(mvp);
+				su->SetArrayValues();
 			}
-			else if (attribName == "modelMatrix")
-			{
-				su->SetValue(model);
-			}
-			break;
-		case Float1:
-			if (attribName == "time")
-			{
-				//su->SetValue(GameEngine::time);
-			}
-			else if (attribName == "shininess")
-			{
-				if (material == NULL)
-				{
-					printf(MATERIAL_ERROR_STRING, this->name);
-					break;
-				}
-				su->SetValue(material->shininess);
-			}
-			else if (attribName == "ambientIntensity")
-			{
-				if (material == NULL)
-				{
-					printf(MATERIAL_ERROR_STRING, this->name);
-					break;
-				}
-				su->SetValue(material->ambientIntensity);
-			}
-			else if (attribName == "light.attenuation")
-			{
-				su->SetValue(GameEngine::light1->attenuation);
-			}
-			break;
-		case Texture:
-			if (attribName == "texture")
-			{
-				su->SetValue(this->texture);
-			}
-			break;
-		case Float2:
-			if (attribName == "texRatio")
-			{
-				if (material == NULL)
-				{
-					printf(MATERIAL_ERROR_STRING, this->name);
-					break;
-				}
-				su->SetValue(material->uvScale);
-			}
-			break;
-		case Float3:
-			if (attribName == "light.color")
-			{
-				su->SetValue(GameEngine::light1->lightColor);
-			}
-			if (attribName == "cameraPosition")
-			{
-				su->SetValue(GameEngine::camera->cameraPosition);
-			}
-
-			//mat stuff
-			if (attribName == "specularColor")
-			{
-				if (material == NULL)
-				{
-					printf(MATERIAL_ERROR_STRING, this->name);
-					break;
-				}
-				su->SetValue(material->specularColor);
-			}
-			break;
-
-		case Float4:
-			if (attribName == "light.pos")
-			{
-				su->SetValue(GameEngine::light1->lightPosition);
-			}
-			break;
 		}
+		else//its just a singular one time deal.
+		{
+			switch (su->uniformType)
+			{
+			case Matrix4x4:
+				if (attribName == "MVP")
+				{
+					su->SetValue(mvp);
+				}
+				else if (attribName == "modelMatrix")
+				{
+					su->SetValue(model);
+				}
+				break;
+			case Float1:
+				if (attribName == "time")
+				{
+					//su->SetValue(GameEngine::time);
+				}
+				else if (attribName == "shininess")
+				{
+					if (material == NULL)
+					{
+						printf(MATERIAL_ERROR_STRING, this->name);
+						break;
+					}
+					su->SetValue(material->shininess);
+				}
+				else if (attribName == "ambientIntensity")
+				{
+					if (material == NULL)
+					{
+						printf(MATERIAL_ERROR_STRING, this->name);
+						break;
+					}
+					su->SetValue(material->ambientIntensity);
+				}
+				else if (attribName == "numLights")
+				{
+					su->SetValuei(GameEngine::lightCount);
+				}
+				else if (attribName == "light.attenuation")
+				{
+					if (GameEngine::lightCount > 1)
+					{
+
+					}
+					else
+					{
+						su->SetValue(GameEngine::light1->attenuation);
+					}
+				}
+				break;
+			case Texture:
+				if (attribName == "texture")
+				{
+					su->SetValue(this->texture);
+				}
+				break;
+			case Float2:
+				if (attribName == "texRatio")
+				{
+					if (material == NULL)
+					{
+						printf(MATERIAL_ERROR_STRING, this->name);
+						break;
+					}
+					su->SetValue(material->uvScale);
+				}
+				break;
+			case Float3:
+				if (attribName == "light.color")
+				{
+					su->SetValue(GameEngine::light1->lightColor);
+				}
+				if (attribName == "cameraPosition")
+				{
+					su->SetValue(GameEngine::camera->cameraPosition);
+				}
+
+				//mat stuff
+				if (attribName == "specularColor")
+				{
+					if (material == NULL)
+					{
+						printf(MATERIAL_ERROR_STRING, this->name);
+						break;
+					}
+					su->SetValue(material->specularColor);
+				}
+				break;
+
+			case Float4:
+				if (attribName == "light.pos")
+				{
+					su->SetValue(GameEngine::light1->lightPosition);
+				}
+				break;
+			}
+		}	
 	}
 }
 

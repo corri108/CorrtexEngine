@@ -30,10 +30,16 @@ public:
 
 	//adding uniforms and other methods
 	LinkedList<ShaderUniform*> &GetUniforms();
-	void AddUniform(ShaderUniform * uni);
+	void AddUniform(ShaderUniform *uni);
 	void AddUniform(ShaderUniformType type, char* glslName);
 	void AddUniforms(ShaderUniformType type1, char* glslName1, ShaderUniformType type2, char* glslName2);
 	void AddUniforms(ShaderUniformType type1, char* glslName1, ShaderUniformType type2, char* glslName2, ShaderUniformType type3, char* glslName3);
+
+	void AddUniformArray(ShaderUniformType type, char* structName, char* attribName);
+	void AddUniformsArray(ShaderUniformType type1, char* structName1, char* attribName1, ShaderUniformType type2, char* structName2, char* attribName2);
+	void AddUniformsArray(ShaderUniformType type1, char* structName1, char* attribName1, ShaderUniformType type2, char* structName2, char* attribName2,
+		ShaderUniformType type3, char* structName3, char* attribName3);
+
 	void AddAttribute(ShaderLayoutLocation layoutLocation);
 	void AddAttributes(ShaderLayoutLocation layoutLocation1, ShaderLayoutLocation layoutLocation2);
 	void AddAttributes(ShaderLayoutLocation layoutLocation1, ShaderLayoutLocation layoutLocation2, ShaderLayoutLocation layoutLocation3);

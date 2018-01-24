@@ -40,8 +40,10 @@ public:
 	int frame = 0;
 	float aspectRatio = width / height;
 	static bool initLoaded;
+	static int lightCount;
 	//important members
 	static LinkedList<CorrtexObject*> *objectList;
+	static LinkedList<CorrtexLight*> *lights;
 	static CorrtexFPSCamera *camera;
 	static InputManager *input;
 	static ModelLoader *modelLoader;

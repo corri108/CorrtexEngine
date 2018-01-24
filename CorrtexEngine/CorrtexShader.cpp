@@ -16,7 +16,7 @@ CorrtexShader::~CorrtexShader()
 
 }
 
-void CorrtexShader::AddUniform(ShaderUniform * uni)
+void CorrtexShader::AddUniform(ShaderUniform *uni)
 {
 	uniforms->Add(uni);
 }
@@ -35,6 +35,23 @@ void CorrtexShader::AddUniforms(ShaderUniformType type1, char* glslName1, Shader
 	uniforms->Add(new ShaderUniform(type1, this->shaderID, glslName1));
 	uniforms->Add(new ShaderUniform(type2, this->shaderID, glslName2));
 	uniforms->Add(new ShaderUniform(type3, this->shaderID, glslName3));
+}
+
+void CorrtexShader::AddUniformArray(ShaderUniformType type, char* structName, char* attribName)
+{
+	uniforms->Add(new ShaderUniform(type, this->shaderID, structName, attribName));
+}
+void CorrtexShader::AddUniformsArray(ShaderUniformType type1, char* structName1, char* attribName1, ShaderUniformType type2, char* structName2, char* attribName2)
+{
+	uniforms->Add(new ShaderUniform(type1, this->shaderID, structName1, attribName1));
+	uniforms->Add(new ShaderUniform(type2, this->shaderID, structName2, attribName2));
+}
+void CorrtexShader::AddUniformsArray(ShaderUniformType type1, char* structName1, char* attribName1, ShaderUniformType type2, char* structName2, char* attribName2,
+	ShaderUniformType type3, char* structName3, char* attribName3)
+{
+	uniforms->Add(new ShaderUniform(type1, this->shaderID, structName1, attribName1));
+	uniforms->Add(new ShaderUniform(type2, this->shaderID, structName2, attribName2));
+	uniforms->Add(new ShaderUniform(type3, this->shaderID, structName3, attribName3));
 }
 
 void CorrtexShader::AddAttribute(ShaderLayoutLocation layoutLocation)

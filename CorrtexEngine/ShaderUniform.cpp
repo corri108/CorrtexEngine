@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ShaderUniform.h"
-
+#include "GameEngine.h"
 
 ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char * glslName)
 {
@@ -11,6 +11,17 @@ ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char 
 	this->handle = GenerateLocationHandle();
 }
 
+ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char * arrayStructName, char* attribute)
+{
+	this->shaderProgram = shaderProgram;
+	this->glslName = arrayStructName;
+	this->uniformType = type;
+	this->valueInArray = true;
+	this->arrayStructName = arrayStructName;
+	this->arrayStructAttribute = attribute;
+	this->handles = GenerateLocationHandles();
+}
+
 ShaderUniform::~ShaderUniform()
 {
 
@@ -19,6 +30,28 @@ ShaderUniform::~ShaderUniform()
 int ShaderUniform::GenerateLocationHandle()
 {
 	return glGetUniformLocation(shaderProgram, glslName);
+}
+
+std::vector<GLuint> ShaderUniform::GenerateLocationHandles()
+{
+	std::vector<GLuint> genHandles;
+	int numHandles = 1;
+
+	if (this->arrayStructName == "allLights")
+	{
+		numHandles = GameEngine::lightCount;
+	}
+
+	for (int i = 0; i < numHandles; ++i)
+	{
+		char fullStructAttributeName[100];
+		sprintf(fullStructAttributeName, "%s[%d].%s",this->arrayStructName, i, this->arrayStructAttribute);
+		GLuint newHandle = glGetUniformLocation(shaderProgram, fullStructAttributeName);
+		printf("buffer (loc, name): (%d, %s)\n", newHandle, fullStructAttributeName);
+		genHandles.push_back(newHandle);
+	}
+
+	return genHandles;
 }
 
 int ShaderUniform::GetHandle()
@@ -69,6 +102,10 @@ void ShaderUniform::SetValue(int i1, int i2, int i3, int i4)
 	glUniform4i(handle, i1, i2, i3, i4);
 }
 //other
+void ShaderUniform::SetValuei(int intVal)
+{
+	glUniform1i(handle, intVal);
+}
 void ShaderUniform::SetValue(GLuint texture)
 {
 	glUniform1i(handle, texture);
@@ -76,4 +113,35 @@ void ShaderUniform::SetValue(GLuint texture)
 void ShaderUniform::SetValue(mat4 matrix)
 {
 	glUniformMatrix4fv(handle, 1, GL_FALSE, &matrix[0][0]);
+}
+
+void ShaderUniform::SetArrayValues()
+{
+	int count = this->handles.size();
+
+	for (int i = 0; i < count; ++i)
+	{
+		this->handle = this->handles[i];
+
+		if (arrayStructAttribute == "pos")
+		{
+			SetValue(GameEngine::lights->Get(i)->lightPosition);
+		}
+		else if (arrayStructAttribute == "color")
+		{
+			SetValue(GameEngine::lights->Get(i)->lightColor);
+		}
+		else if (arrayStructAttribute == "attenuation")
+		{
+			SetValue(GameEngine::lights->Get(i)->attenuation);
+		}
+		else if (arrayStructAttribute == "coneAngle")
+		{
+			SetValue(GameEngine::lights->Get(i)->coneAngle);
+		}
+		else if (arrayStructAttribute == "coneDirection")
+		{
+			SetValue(GameEngine::lights->Get(i)->coneDirection);
+		}
+	}
 }

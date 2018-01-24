@@ -1,6 +1,7 @@
 #pragma once
 #include "glew.h"
 #include "glm/ext.hpp"
+#include <vector>
 
 using namespace glm;
 
@@ -22,6 +23,7 @@ class ShaderUniform
 {
 public:
 	ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char * glslName);
+	ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char * arrayStructName, char* attribute);
 	~ShaderUniform();
 	//float
 	void SetValue(float f1);
@@ -38,14 +40,22 @@ public:
 	//other
 	void SetValue(GLuint texture);
 	void SetValue(mat4 matrix);
-
+	void SetValuei(int vali);
 	int GetHandle();
+
+	//multiple
+	bool valueInArray = false;
+	void SetArrayValues();
 
 	GLuint shaderProgram;
 	GLuint handle = 0;
+	std::vector<GLuint> handles;
 	char* glslName = "";
 	ShaderUniformType uniformType = Float1;
+	char* arrayStructName = NULL;
+	char* arrayStructAttribute = NULL;
 private:
 	int GenerateLocationHandle();
+	std::vector<GLuint> GenerateLocationHandles();
 };
 

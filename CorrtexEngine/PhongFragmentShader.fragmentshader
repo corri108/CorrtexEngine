@@ -20,7 +20,7 @@ uniform struct Light
 	float attenuation;
 	float coneAngle;
 	vec3 coneDirection;
-} light;
+} allLights[MAX_LIGHTS];
 
 in vec3 vertPositions;
 in vec2 vertUVs;
@@ -88,11 +88,11 @@ void main()
 	vec3 surfaceToCamera = normalize(cameraPosition - surfacePos);
 		
 	vec3 linear = vec3 (0);
-	//for ( int i = 0; i < numLights; ++i)
-	//{
-	//	linear += ApplyLight( allLights[i], normal, surfacePos, surfaceColor.rgb, surfaceToCamera);
-	//}
-	linear = ApplyLight(light, normal, surfacePos, surfaceColor.rgb, surfaceToCamera);
+	for ( int i = 0; i < numLights; ++i)
+	{
+		linear += ApplyLight( allLights[i], normal, surfacePos, surfaceColor.rgb, surfaceToCamera);
+	}
+	//linear = ApplyLight(light, normal, surfacePos, surfaceColor.rgb, surfaceToCamera);
 		
 	vec3 gamma = vec3 (1.0 / 2.2);	
 	finalColor = vec4 (pow(linear, gamma), surfaceColor.a);
