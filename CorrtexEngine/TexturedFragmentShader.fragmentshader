@@ -1,13 +1,12 @@
 #version 330 core
 
 uniform sampler2D tex;
+uniform vec2 texRatio = vec2(1,1);
 in vec2 UV;
 out vec3 fragColor;
 
 void main()
 {
-	fragColor = texture(tex, UV).rgb;
-
-	if(fragColor == vec3(0,0,0))//error? use pink color
-		fragColor = vec3(1,0,1);
+	vec2 adjustedUVs = UV * texRatio;
+	fragColor = texture(tex, adjustedUVs).rgb;
 }

@@ -2,45 +2,75 @@
 
 uniform mat4 modelMatrix;
 uniform sampler2D tex;
+uniform vec2 texRatio = vec2(1,1);
+
+uniform float ambientIntensity;
 uniform struct Light
 {
-	vec3 pos;
+	vec4 pos;
 	vec3 color;
+	float attenuation;
+	float coneAngle;
+	vec3 coneDirection;
 } light;
 
 in vec3 vertPositions;
 in vec2 vertUVs;
 in vec3 vertNormals;
-
 out vec4 finalColor;
+
+vec3 ApplyLight(Light light, vec3 normal, vec3 surfacePos, vec3 surfaceCol)
+{
+	//get surface to light vector first
+	vec3 surfaceToLight;// = normalize(light.pos - surfacePos);
+	float attenuation = 1.0;
+	
+	if (light.pos.w == 0)
+	{
+		//directional light!
+		surfaceToLight = normalize(light.pos.xyz);//infinite direction
+		attenuation = 1.0;
+	}
+	else
+	{
+		//either point or cone
+		surfaceToLight = normalize(light.pos.xyz - surfacePos);
+		//attenuation exists for these two
+		float distanceToLight = length(light.pos.xyz - surfacePos);
+		attenuation = 1.0 / (1.0 + light.attenuation * pow(distanceToLight, 2));
+		
+		//cones if possible
+		if (light.coneAngle > 0.0)
+		{
+			float lightToSurfaceAngle = degrees(acos(dot(-surfaceToLight, normalize(light.coneDirection))));
+			if (lightToSurfaceAngle > light.coneAngle)
+			{
+				attenuation = 0.0;
+			}
+		}
+	}
+	
+	//only diffuse and ambient here
+	float diffuseCoef = max(0.0, dot(normal, surfaceToLight));
+	vec3 diffuse = diffuseCoef * light.color * surfaceCol.rgb;
+	vec3 ambient = ambientIntensity * surfaceCol.rgb * light.color;
+
+	return ambient + attenuation * diffuse;
+}
 
 void main()
 {
 	//get normal in world coords
-	mat3 model3 = mat3(modelMatrix);
-	mat3 normalMatrix = transpose(inverse(model3));
+	mat3 normalMatrix = transpose(inverse( mat3 (modelMatrix)));
+	
 	vec3 normal = normalize(normalMatrix * vertNormals);
+	vec2 adjustedUVs = vertUVs * texRatio;
+	vec4 surfaceColor = texture(tex, adjustedUVs);
+	vec3 surfacePos = vec3 (modelMatrix * vec4 (vertPositions, 1));
 	
-	//get location of this frag
-	vec4 vertPos4 = vec4(vertPositions, 1);
-	vec3 fragPosition = vec3(modelMatrix * vertPos4);
+	vec3 linear = vec3 (0);	
+	linear = ApplyLight(light, normal, surfacePos, surfaceColor.rgb);
 	
-	//surface to light vector
-	vec3 surfaceToLight = light.pos - fragPosition;
-	
-	//cosine of angle of incidence
-	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
-	brightness = clamp (brightness, 0, 1);
-	
-	//calculate final color of the pixel, based on:
-    // 1. The angle of incidence: brightness
-    // 2. The color/intensities of the light: light.intensities
-    // 3. The texture and texture coord: texture(tex, fragTexCoord)
-	vec4 surfaceColor = texture(tex, vertUVs);
-	
-	//if(surfaceColor.rgb == vec3(0,0,0))//error? use pink color
-		//surfaceColor = vec4(1,0,1, surfaceColor.a);
-		
-	finalColor = vec4(brightness * surfaceColor.rgb * light.color, surfaceColor.a);
-	//finalColor = vec4(1,1,0,1);
+	vec3 gamma = vec3 (1.0 / 2.2);	
+	finalColor = vec4 (pow(linear, gamma), surfaceColor.a);
 }

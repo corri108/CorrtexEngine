@@ -15,7 +15,9 @@ public:
 	virtual void Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform);
 	virtual void Initialize();
 	virtual void AddTexture(char * textureLocation);
-	void CorrtexMesh::AddTexture(GLuint textureLoc);
+	void AddTexture(GLuint textureLoc);
+	void SetShaderValues(mat4 mvp);
+	void SetShaderAttributes();
 	vector< glm::vec3 > vertices;
 	vector< glm::vec2 > uvs;
 	vector< glm::vec3 > normals;

@@ -3,12 +3,12 @@
 
 
 CorrtexLight::CorrtexLight():
-	CorrtexLight(vec3(0), vec3(1))
+	CorrtexLight(vec4(0,0,0,1), vec3(1))
 {
 
 }
 
-CorrtexLight::CorrtexLight(vec3 pos, vec3 col)
+CorrtexLight::CorrtexLight(vec4 pos, vec3 col)
 {
 	this->lightPosition = pos;
 	this->lightColor = col;

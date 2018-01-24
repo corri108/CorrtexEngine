@@ -22,27 +22,23 @@ void B1(CorrtexObject &co)
 void Game::Init()
 {
 	//test phong shader
-	CorrtexShader *phongGamma = new CorrtexShader("PhongGammaVertexShader.vertexshader", "PhongGammaFragmentShader.fragmentshader");
-	phongGamma->AddAttributes(VERTEX, UV, NORMAL);
-	phongGamma->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
-	phongGamma->AddUniforms(Float3, "light.pos", Float3, "light.color", Float1, "light.attenuation");
-	phongGamma->AddUniforms(Float3, "cameraPosition", Float3, "specularColor", Float1, "shininess");
-	phongGamma->AddUniform(Float1, "ambientIntensity");
-	//test phong shader
 	CorrtexShader *phongShader = new CorrtexShader("PhongVertexShader.vertexshader", "PhongFragmentShader.fragmentshader");
 	phongShader->AddAttributes(VERTEX, UV, NORMAL);
 	phongShader->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
-	phongShader->AddUniforms(Float3, "light.pos", Float3, "light.color", Float1, "ambientIntensity");
+	phongShader->AddUniforms(Float4, "light.pos", Float3, "light.color", Float1, "light.attenuation");
+	phongShader->AddUniforms(Float1, "light.coneAngle", Float3, "light.coneDirection");
 	phongShader->AddUniforms(Float3, "cameraPosition", Float3, "specularColor", Float1, "shininess");
+	phongShader->AddUniforms(Float1, "ambientIntensity", Float2, "texRatio");
 	//test diffuse shader
 	CorrtexShader *diffuseShader = new CorrtexShader("DiffuseVertexShader.vertexshader", "DiffuseFragmentShader.fragmentshader");
 	diffuseShader->AddAttributes(VERTEX, UV, NORMAL);
 	diffuseShader->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
-	diffuseShader->AddUniforms(Float3, "light.pos", Float3, "light.color");
+	diffuseShader->AddUniforms(Float4, "light.pos", Float3, "light.color", Float2, "texRatio");
+	diffuseShader->AddUniforms(Float1, "ambientIntensity", Float1, "light.coneAngle", Float3, "light.coneDirection");
 	//test texture shader
 	CorrtexShader *textureShader = new CorrtexShader("TexturedVertexShader.vertexshader", "TexturedFragmentShader.fragmentshader");
 	textureShader->AddAttributes(VERTEX, UV);
-	textureShader->AddUniforms(Matrix4x4, "MVP", Texture, "tex");
+	textureShader->AddUniforms(Matrix4x4, "MVP", Texture, "tex", Float2, "texRatio");
 	//test red shader
 	CorrtexShader *redShader = new CorrtexShader("AllRed.vertexshader", "AllRed.fragmentshader");
 	redShader->AddUniform(Matrix4x4, "MVP");
@@ -63,19 +59,20 @@ void Game::Init()
 	}
 
 	CorrtexMaterial *testMat = new CorrtexMaterial(0.1f, 0.2f, vec3(0.9f, 0.11f, 0.33f));
-	CorrtexMaterial *testMat2 = new CorrtexMaterial(0.1f, 0.2f, vec3(93.0f / 255.0f, 112.0f / 255.0f, 33.0f / 255.0f));
+	CorrtexMaterial *terrainGrassMaterial = new CorrtexMaterial(0.1f, 0.2f, vec3(93.0f / 255.0f, 112.0f / 255.0f, 33.0f / 255.0f));
+	terrainGrassMaterial->uvScale = vec2(25);
 	//test mesh
 	mesh = new CorrtexMesh(vec3(-3, 1.22f, 0), "Assets/crate.obj");
 	mesh->SetScale(0.5f);
 	mesh->AddTexture("Assets/metalCrate.bmp");
-	mesh->SetShader(phongGamma);
+	mesh->SetShader(phongShader);
 	mesh->SetMaterial(testMat);
 
 	CorrtexMesh* mesh2 = new CorrtexMesh(vec3(0, 0, 0), "Assets/terrain.obj");
 	mesh2->SetScale(0.5f);
 	mesh2->AddTexture("Assets/grass.bmp");
-	mesh2->SetShader(phongGamma);
-	mesh2->SetMaterial(testMat2);
+	mesh2->SetShader(diffuseShader);
+	mesh2->SetMaterial(terrainGrassMaterial);
 	mesh2->scale = vec3(2, 1, 2);
 }
 

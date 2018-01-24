@@ -1,8 +1,10 @@
 #version 330 core
 
 uniform mat4 modelMatrix;
-uniform sampler2D tex;
 uniform vec3 cameraPosition;
+//texture
+uniform sampler2D tex;
+uniform vec2 texRatio = vec2(1,1);
 //specular stuff
 uniform float ambientIntensity;
 uniform float shininess;
@@ -30,7 +32,6 @@ void main()
 	
 	//surface to light vector
 	vec3 surfaceToLight = normalize(light.pos - surfacePos);
-	vec2 texRatio = vec2(20,20);
 	vec2 adjustedVertUVs = vertUVs * texRatio;
 	vec4 surfaceColor = texture(tex, adjustedVertUVs);
 	

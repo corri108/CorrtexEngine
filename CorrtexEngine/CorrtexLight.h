@@ -6,11 +6,13 @@ class CorrtexLight : public CorrtexCube
 {
 public:
 	CorrtexLight();
-	CorrtexLight(vec3 pos, vec3 col);
+	CorrtexLight(vec4 pos, vec3 col);
 	~CorrtexLight();
 	virtual void Update(float time);
-	vec3 lightPosition;
+	vec4 lightPosition;
 	vec3 lightColor;
 	float attenuation = 0.1f;
+	float coneAngle = 45.0f;
+	vec3 coneDirection = vec3(0, -1, 0);
 };
 

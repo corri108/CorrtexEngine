@@ -12,5 +12,6 @@ public:
 	float ambientIntensity = 0.075f;
 	float shininess = 0.1f;
 	vec3 specularColor = vec3(0.22f, 0.12f, 0.35f);
+	vec2 uvScale = vec2(1.0f, 1.0f);
 };
 
