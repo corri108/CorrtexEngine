@@ -170,7 +170,7 @@ void GameEngine::Init()
 	modelLoader = new ModelLoader();
 	imageLoader = new BMPLoader();
 	light1 = new CorrtexLight(vec4(0, 4, 0, 1), 5* vec3(1, 0, 1));//red point light
-	CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 8 * vec3(0, 0, 1));//blue spot light
+	CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 1 * vec3(0, 0, 1));//blue spot light
 	light2->coneAngle = 45.0f;
 	CorrtexLight *light3 = new CorrtexLight(vec4(1, 5, 2, 0), 1 * vec3(1, 1, 1));//white directional light
 

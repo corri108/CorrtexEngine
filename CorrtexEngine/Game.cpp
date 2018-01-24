@@ -21,6 +21,14 @@ void B1(CorrtexObject &co)
 
 void Game::Init()
 {
+	//test LOD shader
+	CorrtexShader *LODshader = new CorrtexShader("DiffuseVertexShader.vertexshader", "DiffuseLODFragmentShader.fragmentshader");
+	LODshader->AddAttributes(VERTEX, UV, NORMAL);
+	LODshader->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
+	LODshader->AddUniformsArray(Float4, "allLights", "pos", Float3, "allLights", "color", Float1, "allLights", "attenuation");
+	LODshader->AddUniformsArray(Float1, "allLights", "coneAngle", Float3, "allLights", "coneDirection");
+	LODshader->AddUniforms(Float2, "texRatio", Float1, "ambientIntensity", Float1, "numLights");
+	LODshader->AddUniform(Float3, "cameraPosition");
 	//test phong shader
 	CorrtexShader *phongShader = new CorrtexShader("PhongVertexShader.vertexshader", "PhongFragmentShader.fragmentshader");
 	phongShader->AddAttributes(VERTEX, UV, NORMAL);
@@ -72,7 +80,7 @@ void Game::Init()
 	CorrtexMesh* mesh2 = new CorrtexMesh(vec3(0, 0, 0), "Assets/terrain.obj");
 	mesh2->SetScale(0.5f);
 	mesh2->AddTexture("Assets/grass.bmp");
-	mesh2->SetShader(diffuseShader);
+	mesh2->SetShader(LODshader);
 	mesh2->SetMaterial(terrainGrassMaterial);
 	mesh2->scale = vec3(2, 1, 2);
 }

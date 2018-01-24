@@ -1,0 +1,110 @@
+#version 330 core
+
+uniform mat4 modelMatrix;
+uniform sampler2D tex;
+uniform vec2 texRatio = vec2(1,1);
+uniform vec3 cameraPosition;
+
+uniform float ambientIntensity;
+#define MAX_LIGHTS 10
+uniform int numLights = 1;
+uniform struct Light
+{
+	vec4 pos;
+	vec3 color;
+	float attenuation;
+	float coneAngle;
+	vec3 coneDirection;
+} allLights[MAX_LIGHTS];
+
+float lodRange[4] = {9,60,100,250};
+
+in vec3 vertPositions;
+in vec2 vertUVs;
+in vec3 vertNormals;
+out vec4 finalColor;
+
+vec3 ApplyLight(Light light, vec3 normal, vec3 surfacePos, vec3 surfaceCol)
+{
+	//get surface to light vector first
+	vec3 surfaceToLight;// = normalize(light.pos - surfacePos);
+	float attenuation = 1.0;
+	
+	if (light.pos.w == 0)
+	{
+		//directional light!
+		surfaceToLight = normalize(light.pos.xyz);//infinite direction
+		attenuation = 1.0;
+	}
+	else
+	{
+		//either point or cone
+		surfaceToLight = normalize(light.pos.xyz - surfacePos);
+		//attenuation exists for these two
+		float distanceToLight = length(light.pos.xyz - surfacePos);
+		attenuation = 1.0 / (1.0 + light.attenuation * pow(distanceToLight, 2));
+		
+		//cones if possible
+		if (light.coneAngle > 0.0)
+		{
+			float lightToSurfaceAngle = degrees(acos(dot(-surfaceToLight, normalize(light.coneDirection))));
+			if (lightToSurfaceAngle > light.coneAngle)
+			{
+				attenuation = 0.0;
+			}
+		}
+	}
+	
+	//only diffuse and ambient here
+	float diffuseCoef = max(0.0, dot(normal, surfaceToLight));
+	vec3 diffuse = diffuseCoef * light.color * surfaceCol.rgb;
+	vec3 ambient = ambientIntensity * surfaceCol.rgb * light.color;
+
+	return ambient + attenuation * diffuse;
+}
+
+void main()
+{
+	//get normal in world coords
+	mat3 normalMatrix = transpose(inverse( mat3 (modelMatrix)));
+	
+	vec3 normal = normalize(normalMatrix * vertNormals);
+	vec3 surfacePos = vec3 (modelMatrix * vec4 (vertPositions, 1));
+	vec3 surfaceToCamera = cameraPosition - surfacePos;
+	
+	float distanceToCamera = length(surfaceToCamera);
+	
+	vec2 tileScale = vec2 (1.0);
+	if (distanceToCamera < lodRange[0])
+	{
+		tileScale = texRatio * 5.0;
+	}
+	else if (distanceToCamera < lodRange[1])
+	{
+		tileScale = texRatio * 2.5;
+	}
+	else if (distanceToCamera < lodRange[2])
+	{
+		tileScale = texRatio * 1.5;
+	}
+	else if (distanceToCamera < lodRange[3])
+	{
+		tileScale = texRatio * 0.5;
+	}
+	else
+	{
+		tileScale = texRatio * 0.2;
+	}
+	
+	vec2 adjustedUVs = vertUVs * tileScale;
+	vec4 surfaceColor = texture(tex, adjustedUVs);
+	
+	vec3 linear = vec3 (0);	
+	for ( int i = 0; i < numLights; ++i)
+	{
+		linear += ApplyLight(allLights[i], normal, surfacePos, surfaceColor.rgb);
+	}
+	
+	vec3 gamma = vec3 (1.0 / 2.2);	
+	finalColor = vec4 (pow(linear, gamma), surfaceColor.a);
+}
