@@ -1,0 +1,46 @@
+#version 330 core
+
+uniform mat4 modelMatrix;
+uniform sampler2D tex;
+uniform struct Light
+{
+	vec3 pos;
+	vec3 color;
+} light;
+
+in vec3 vertPositions;
+in vec2 vertUVs;
+in vec3 vertNormals;
+
+out vec4 finalColor;
+
+void main()
+{
+	//get normal in world coords
+	mat3 model3 = mat3(modelMatrix);
+	mat3 normalMatrix = transpose(inverse(model3));
+	vec3 normal = normalize(normalMatrix * vertNormals);
+	
+	//get location of this frag
+	vec4 vertPos4 = vec4(vertPositions, 1);
+	vec3 fragPosition = vec3(modelMatrix * vertPos4);
+	
+	//surface to light vector
+	vec3 surfaceToLight = light.pos - fragPosition;
+	
+	//cosine of angle of incidence
+	float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
+	brightness = clamp (brightness, 0, 1);
+	
+	//calculate final color of the pixel, based on:
+    // 1. The angle of incidence: brightness
+    // 2. The color/intensities of the light: light.intensities
+    // 3. The texture and texture coord: texture(tex, fragTexCoord)
+	vec4 surfaceColor = texture(tex, vertUVs);
+	
+	//if(surfaceColor.rgb == vec3(0,0,0))//error? use pink color
+		//surfaceColor = vec4(1,0,1, surfaceColor.a);
+		
+	finalColor = vec4(brightness * surfaceColor.rgb * light.color, surfaceColor.a);
+	//finalColor = vec4(1,1,0,1);
+}

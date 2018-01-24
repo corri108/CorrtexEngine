@@ -26,6 +26,26 @@ CorrtexObject::~CorrtexObject()
 
 }
 
+void CorrtexObject::SetShader(CorrtexShader *shader)
+{
+	this->shader = shader;
+}
+
+void CorrtexObject::SetShader(CorrtexShader &shader)
+{
+	this->shader = &shader;
+}
+
+void CorrtexObject::SetMaterial(CorrtexMaterial *mat)
+{
+	this->material = mat;
+}
+
+void CorrtexObject::SetMaterial(CorrtexMaterial &mat)
+{
+	this->material = &mat;
+}
+
 void CorrtexObject::GetErrorIfExists()
 {
 	GLenum err = glGetError();

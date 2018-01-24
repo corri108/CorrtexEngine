@@ -8,6 +8,7 @@ public:
 	CorrtexPrimitive(vec3 pos, int vertexCount);
 	~CorrtexPrimitive();
 	virtual void Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform);
+	//virtual void Update(float time);
 	virtual void Initialize();
 	virtual void Initialize(GLfloat *vertData, GLfloat *colorData);
 	virtual void SetBufferData();
@@ -15,7 +16,8 @@ public:
 	virtual void CreateBuffers();
 	virtual void Debug();
 	int vertexCount = 9;//triangle
-	void SetTexture(GLuint texture);
+	void AddTexture(char *filePath);
+	void CorrtexPrimitive::AddTexture(GLuint tex);
 protected:
 	GLfloat *vertexBufferData;
 	GLfloat *colorBufferData;

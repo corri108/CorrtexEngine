@@ -43,6 +43,12 @@
     <Filter Include="Source Files\Engine\Networking">
       <UniqueIdentifier>{cf1a23a7-022d-4bba-b928-025ec3ea17f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\User">
+      <UniqueIdentifier>{672cd8e6-8917-48c1-9f17-eb74baf4150d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Objects\Mesh">
+      <UniqueIdentifier>{c5bc3a06-ef0a-4770-996e-eae4f203a948}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -108,11 +114,17 @@
     <ClInclude Include="CorrtexMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CorrtexShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CorrtexLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CorrtexMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CorrtexFPSCamera.cpp">
       <Filter>Source Files\Engine\Cameras</Filter>
     </ClCompile>
@@ -152,9 +164,6 @@
     <ClCompile Include="BMPLoader.cpp">
       <Filter>Source Files\Engine\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CorrtexQuad.cpp">
       <Filter>Source Files\Engine\Objects\Primitives</Filter>
     </ClCompile>
@@ -164,8 +173,23 @@
     <ClCompile Include="GameEngine.cpp">
       <Filter>Source Files\Engine\Game</Filter>
     </ClCompile>
-    <ClCompile Include="CorrtexMesh.cpp">
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\User</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files\Engine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="CorrtexShader.cpp">
+      <Filter>Source Files\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="CorrtexLight.cpp">
+      <Filter>Source Files\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="CorrtexMaterial.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CorrtexMesh.cpp">
+      <Filter>Source Files\Engine\Objects\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +215,12 @@
       <Filter>Source Files\Engine\Shaders</Filter>
     </None>
     <None Include="DiffuseFragmentShader.fragmentshader">
+      <Filter>Source Files\Engine\Shaders</Filter>
+    </None>
+    <None Include="AllRed.fragmentshader">
+      <Filter>Source Files\Engine\Shaders</Filter>
+    </None>
+    <None Include="AllRed.vertexshader">
       <Filter>Source Files\Engine\Shaders</Filter>
     </None>
   </ItemGroup>

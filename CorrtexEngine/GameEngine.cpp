@@ -7,6 +7,7 @@ CorrtexFPSCamera *GameEngine::camera = NULL;
 InputManager *GameEngine::input = NULL;
 ModelLoader *GameEngine::modelLoader = NULL;
 BMPLoader *GameEngine::imageLoader = NULL;
+CorrtexLight *GameEngine::light1 = NULL;
 bool GameEngine::initLoaded = false;
 
 GameEngine::GameEngine()
@@ -156,8 +157,6 @@ void GameEngine::SetUserFunc(CorrtexFunc userInit, CorrtexFuncf userUpdate)
 
 void GameEngine::Init()
 {
-	CorrtexDebug::Set(true);
-
 	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 	objectList = new LinkedList<CorrtexObject*>();
@@ -167,6 +166,8 @@ void GameEngine::Init()
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
 	modelLoader = new ModelLoader();
 	imageLoader = new BMPLoader();
+	light1 = new CorrtexLight(vec3(0, 0, 2), 10 * vec3(1, 1, 1));
+	//light1->lightColor = vec3(0.15f, 0.15f, 0.15f);
 
 	UserInit();
 
@@ -189,7 +190,7 @@ void GameEngine::Update()
 	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
-		objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
+		objectList->Get(i)->Update(time);
 	}
 }
 
@@ -206,6 +207,7 @@ void GameEngine::Draw()
 	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
+		glUseProgram(programID);//set default shader for those objects without shaders
 		objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
 	}
 

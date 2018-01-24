@@ -173,11 +173,14 @@
     <ClInclude Include="CorrtexDebug.h" />
     <ClInclude Include="CorrtexDelegate.h" />
     <ClInclude Include="CorrtexFPSCamera.h" />
+    <ClInclude Include="CorrtexLight.h" />
+    <ClInclude Include="CorrtexMaterial.h" />
     <ClInclude Include="CorrtexMesh.h" />
     <ClInclude Include="CorrtexObject.h" />
     <ClInclude Include="CorrtexPrimitive.h" />
     <ClInclude Include="CorrtexQuad.h" />
     <ClInclude Include="CorrtexRandom.h" />
+    <ClInclude Include="CorrtexShader.h" />
     <ClInclude Include="CorrtexTetrahedron.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="InputManager.h" />
@@ -197,11 +200,14 @@
     <ClCompile Include="CorrtexDelegate.cpp" />
     <ClCompile Include="CorrtexEngine.cpp" />
     <ClCompile Include="CorrtexFPSCamera.cpp" />
+    <ClCompile Include="CorrtexLight.cpp" />
+    <ClCompile Include="CorrtexMaterial.cpp" />
     <ClCompile Include="CorrtexMesh.cpp" />
     <ClCompile Include="CorrtexObject.cpp" />
     <ClCompile Include="CorrtexPrimitive.cpp" />
     <ClCompile Include="CorrtexQuad.cpp" />
     <ClCompile Include="CorrtexRandom.cpp" />
+    <ClCompile Include="CorrtexShader.cpp" />
     <ClCompile Include="CorrtexTetrahedron.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -216,6 +222,8 @@
     <ClCompile Include="GameEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AllRed.fragmentshader" />
+    <None Include="AllRed.vertexshader" />
     <None Include="DiffuseFragmentShader.fragmentshader" />
     <None Include="DiffuseVertexShader.vertexshader" />
     <None Include="raymarch.vertexshader" />

@@ -5,13 +5,14 @@
 #include "glfw3.h"
 #include "CorrtexCube.h"
 #include "LinkedList.h"
+#include "CorrtexLight.h"
 #include "BMPLoader.h"
 #include "CorrtexFPSCamera.h"
 #include "InputManager.h"
 #include "CorrtexRandom.h"
 #include "ModelLoader.h"
 #include "CorrtexDelegate.h"
-#include "ShaderUniform.h"
+#include "CorrtexShader.h"
 #include "CorrtexQuad.h"
 #include "CorrtexTetrahedron.h"
 #include "CorrtexMesh.h"
@@ -45,13 +46,15 @@ public:
 	static InputManager *input;
 	static ModelLoader *modelLoader;
 	static BMPLoader *imageLoader;
+	static CorrtexLight * light1;
 	GLuint programID;
 	ShaderUniform *mvpUni;
 	GLFWwindow *window;
 
-	//called from main()
+	//public internal
 	void Run();
 	void SetUserFunc(CorrtexFunc userInit, CorrtexFuncf userUpdate);
+	static GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
 protected:
 	//delegates for function pointers
 	CorrtexFunc UserInit;
@@ -63,7 +66,6 @@ protected:
 	void Update();
 	void Draw();
 	//very internal
-	GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
 	GLFWwindow* WindowInit(int w, int h, char windowTitle[], bool fullscreen);
 };
 

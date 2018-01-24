@@ -1,0 +1,52 @@
+#version 330 core
+
+uniform mat4 modelMatrix;
+uniform sampler2D tex;
+uniform vec3 cameraPosition;
+//specular stuff
+uniform float ambientIntensity;
+uniform float shininess;
+uniform vec3 specularColor;
+//light 
+uniform struct Light
+{
+	//standard light stuff
+	vec3 pos;
+	vec3 color;
+} light;
+
+in vec3 vertPositions;
+in vec2 vertUVs;
+in vec3 vertNormals;
+
+out vec4 finalColor;
+
+void main()
+{
+	//get normal in world coords
+	vec3 normal = normalize(transpose(inverse(mat3(modelMatrix))) * vertNormals);
+	vec3 surfacePos = vec3(modelMatrix * vec4(vertPositions, 1));
+	
+	//surface to light vector
+	vec3 surfaceToLight = normalize(light.pos - surfacePos);
+	vec4 surfaceColor = texture(tex, vertUVs);
+	
+	//cosine of angle of incidence
+	float diffuseCoef = max(0.0, dot(normal, surfaceToLight));
+	vec3 diffuse = diffuseCoef * light.color * surfaceColor.rgb;
+	vec3 ambient = ambientIntensity * surfaceColor.rgb * light.color;
+		
+	//now the specular calculations
+	vec3 incidence = -(surfaceToLight);
+	vec3 reflection = reflect(incidence, normal);
+	vec3 surfaceToCamera = normalize(cameraPosition - surfacePos);
+	float cosAngle = max(0.0, dot(surfaceToCamera, reflection));
+	//only have specular color if there is diffuse color as well 
+	float specularCoef = 0.0;
+	if (diffuseCoef > 0.0)
+		specularCoef = pow(cosAngle, shininess);
+		
+	vec3 specular = specularCoef * specularColor * light.color;
+	
+	finalColor = vec4(ambient + diffuse + specular, surfaceColor.a);
+}

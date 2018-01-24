@@ -7,4 +7,7 @@ out vec3 fragColor;
 void main()
 {
 	fragColor = texture(tex, UV).rgb;
+
+	if(fragColor == vec3(0,0,0))//error? use pink color
+		fragColor = vec3(1,0,1);
 }
