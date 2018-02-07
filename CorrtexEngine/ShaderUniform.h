@@ -16,6 +16,8 @@ enum ShaderUniformType
 	Int3,
 	Int4,
 	Texture,
+	Matrix2x2,
+	Matrix3x3,
 	Matrix4x4
 };
 
@@ -34,11 +36,12 @@ public:
 	void SetValue(float f1, float f2, float f3, float f4);
 	void SetValue(vec4 f);
 	//int
-	void SetValue(int i1, int i2);
-	void SetValue(int i1, int i2, int i3);
-	void SetValue(int i1, int i2, int i3, int i4);
+	void SetValuei(int i1, int i2);
+	void SetValuei(int i1, int i2, int i3);
+	void SetValuei(int i1, int i2, int i3, int i4);
 	//other
 	void SetValue(GLuint texture);
+	void SetValue(GLuint texture, int texNum);
 	void SetValue(mat4 matrix);
 	void SetValuei(int vali);
 	int GetHandle();
@@ -57,5 +60,7 @@ public:
 private:
 	int GenerateLocationHandle();
 	std::vector<GLuint> GenerateLocationHandles();
+	//for things that only get set once at the beginning
+	bool setOnce = false;
 };
 

@@ -1,0 +1,200 @@
+#version 330 core
+
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform vec3 cameraPosition;
+uniform vec3 modelPosition;
+uniform vec3 lightPosition;
+//texture
+uniform sampler2D tex;
+uniform sampler2D tex2;
+uniform sampler2D tex3;
+uniform sampler2D tex4;
+uniform sampler2D tex_normal;
+uniform sampler2D tex_normal2;
+uniform sampler2D tex_normal3;
+uniform sampler2D tex_normal4;
+uniform vec2 texRatio = vec2(1,1);
+//specular stuff
+uniform float ambientIntensity;
+uniform float shininess;
+uniform vec3 specularColor;
+//light 
+#define MAX_LIGHTS 10
+uniform int numLights = 1;
+uniform struct Light
+{
+	//standard light stuff
+	vec4 pos;
+	vec3 color;
+	float attenuation;
+	float coneAngle;
+	vec3 coneDirection;
+} allLights[MAX_LIGHTS];
+
+float lodRange[4] = {9,60,100,250};
+float terrainRange[4] = {-100,2,13,20};
+vec4 surface_color_normal = vec4 (1);
+
+in vec3 vertPositions;
+in vec2 vertUVs;
+in vec3 vertNormals;
+in vec3 vertTangents;
+in vec3 vertBitangents;
+
+//for normal mapping
+//in vec3 eyeDirectionCameraspace;
+//in vec3 lightDirectionCameraspace;
+//in vec3 eyeDirectionTangentspace;
+//in vec3 lightDirectionTangentspace;
+
+out vec4 finalColor;
+
+vec3 ApplyLight(Light light, vec3 normal, vec3 surfacePos, vec3 surfaceCol)
+{
+	//get surface to light vector first
+	vec3 surfaceToLight;// = normalize(light.pos - surfacePos);
+	float attenuation = 1.0;
+	
+	if (light.pos.w == 0)
+	{
+		//directional light!
+		surfaceToLight = normalize(light.pos.xyz);//infinite direction
+		attenuation = 1.0;
+	}
+	else
+	{
+		//either point or cone
+		surfaceToLight = normalize(light.pos.xyz - surfacePos);
+		//attenuation exists for these two
+		float distanceToLight = length(light.pos.xyz - surfacePos);
+		attenuation = 1.0 / (1.0 + light.attenuation * pow(distanceToLight, 2));
+		
+		//cones if possible
+		if (light.coneAngle > 0.0)
+		{
+			float lightToSurfaceAngle = degrees(acos(dot(-surfaceToLight, normalize(light.coneDirection))));
+			if (lightToSurfaceAngle > light.coneAngle)
+			{
+				attenuation = 0.0;
+			}
+		}
+	}
+	
+	//cosine of angle of incidence
+	float diffuseCoef = max(0.0, dot(normal, surfaceToLight));
+	vec3 diffuse = diffuseCoef * light.color * surfaceCol.rgb;
+	vec3 ambient = ambientIntensity * surfaceCol.rgb * light.color;
+	
+	return ambient + attenuation * (diffuse);
+}
+
+vec4 ChooseTexture( float vertexHeight, vec2 uvs, float terrainHeight)
+{
+	vec4 surfaceColor = vec4(1);// = texture(tex, uvs);
+	
+	vec4 t1 = texture(tex, uvs);
+	vec4 t2 = texture(tex2, uvs);
+	vec4 t3 = texture(tex3, uvs);
+	vec4 t4 = texture(tex4, uvs);
+	
+	vec4 n1 = texture(tex_normal, uvs);
+	vec4 n2 = texture(tex_normal2, uvs);
+	vec4 n3 = texture(tex_normal3, uvs);
+	vec4 n4 = texture(tex_normal4, uvs);
+	
+	if (vertexHeight > terrainRange[3] + 2 + terrainHeight)//snow
+	{
+		surfaceColor = t4;
+		surface_color_normal = n4;
+	}
+	else if (vertexHeight > terrainRange[3] + terrainHeight)//rock->snow
+	{
+		float r = terrainRange[3] + 2 - vertexHeight + terrainHeight;
+		r = r/2;
+		
+		surfaceColor = mix(t4, t3, r);
+		surface_color_normal = mix(n4, n3, r);
+	}
+	else if (vertexHeight > terrainRange[2] + 2 + terrainHeight)//rock
+	{
+		surfaceColor = t3;
+		surface_color_normal = n3;
+	}
+	else if (vertexHeight >= terrainRange[2] + terrainHeight)//grass->rock
+	{
+		float r = terrainRange[2] + 2 - vertexHeight + terrainHeight;
+		r = r/2;
+		
+		surfaceColor = mix(t3, t2, r);
+		surface_color_normal = mix(n3, n2, r);
+	}
+	else if (vertexHeight  > terrainRange[1] + 2 + terrainHeight)//grass
+	{
+		surfaceColor = t2;
+		surface_color_normal = n2;
+	}
+	else if (vertexHeight > terrainRange[1] + terrainHeight)//water->grass
+	{
+		float r = terrainRange[1] + 2 - vertexHeight + terrainHeight;
+		r = r/2;
+		
+		surfaceColor = mix(t2, t1, r);
+		surface_color_normal = mix(n2, n1, r);
+	}
+	else if (vertexHeight > terrainRange[0] + terrainHeight)//water
+	{
+		surfaceColor = t1;		
+		surface_color_normal = n1;
+	}
+	
+	return surfaceColor;
+}
+
+void main()
+{
+	//get normal in world coords
+	mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+	vec3 normal = normalize(normalMatrix * vertNormals);
+	vec3 surfacePos = vec3(modelMatrix * vec4(vertPositions, 1));
+	vec2 adjustedVertUVs = vertUVs * texRatio;
+	vec3 surfaceToCamera = normalize(cameraPosition - surfacePos);
+	//choose texture based on height of vertex
+	float terrainY = modelPosition.y; //modelMatrix[2][3];
+	vec4 surfaceColor = ChooseTexture(surfacePos.y, adjustedVertUVs, terrainY);
+	
+	//surface_color_normal has now been decided
+	vec3 tan = normalize(vertTangents);
+	vec3 biTan = normalize(vertBitangents);
+	mat3 TBN = mat3 (tan, biTan, normal);
+	//normal = normalize(normalMatrix * (TBN * (surface_color_normal.rgb * 2.0 - 1.0 )));
+	
+	vec3 lightDir = normalize(lightPosition - surfacePos);
+	float NdotLD = max(dot(normal, lightDir), 0.0);
+	vec3 camDir = normalize(cameraPosition - surfacePos);
+	vec3 reflection = reflect(-lightDir, normal);
+	float CDdotR = max(dot(camDir, reflection), 0.0);
+	
+	vec3 linear = vec3 (0);
+	for ( int i = 0; i < numLights; ++i)
+	{
+		linear += ApplyLight( allLights[i], normal, surfacePos, surfaceColor.rgb);
+	}
+	
+	//linear *= 0.25 + 0.75 * NdotLD;
+	//linear += pow(CDdotR, 128.0);
+		
+	vec3 gamma = vec3 (1.0 / 2.2);	
+	finalColor = vec4 (pow(linear, gamma), surfaceColor.a);
+}
+
+
+
+
+
+
+
+
+
+
+

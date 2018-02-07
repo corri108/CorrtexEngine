@@ -29,11 +29,18 @@ CorrtexObject::~CorrtexObject()
 void CorrtexObject::SetShader(CorrtexShader *shader)
 {
 	this->shader = shader;
+	ShaderInit();
 }
 
 void CorrtexObject::SetShader(CorrtexShader &shader)
 {
 	this->shader = &shader;
+	ShaderInit();
+}
+
+void CorrtexObject::ShaderInit()
+{
+
 }
 
 void CorrtexObject::SetMaterial(CorrtexMaterial *mat)

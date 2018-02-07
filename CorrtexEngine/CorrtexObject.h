@@ -22,6 +22,7 @@ public:
 	virtual void SetShader(CorrtexShader &shader);
 	virtual void SetMaterial(CorrtexMaterial *mat);
 	virtual void SetMaterial(CorrtexMaterial &mat);
+	virtual void ShaderInit();
 	~CorrtexObject();
 	typedef void(CorrtexObject::*CorrtexBehaviour)(CorrtexObject);
 	CorrtexBehaviour Behaviour = NULL;

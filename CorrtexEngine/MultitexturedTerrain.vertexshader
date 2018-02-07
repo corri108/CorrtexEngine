@@ -1,0 +1,37 @@
+#version 330 core
+uniform mat4 MVP;
+uniform mat3 MV3x3;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+
+uniform vec3 lightPosition;
+
+layout(location=0) in vec3 vertexPositions;
+layout(location=2) in vec2 vertexUVs;
+layout(location=3) in vec3 vertexNormals;
+layout(location=4) in vec3 vertexTangents;
+layout(location=5) in vec3 vertexBitangents;
+
+out vec3 vertPositions;
+out vec2 vertUVs;
+out vec3 vertNormals;
+out vec3 vertTangents;
+out vec3 vertBitangents;
+
+//out vec3 eyeDirectionCameraspace;
+//out vec3 lightDirectionCameraspace;
+
+//out vec3 lightDirectionTangentspace;
+//out vec3 eyeDirectionTangentspace;
+
+void main()
+{
+	//transfer these directly
+	vertPositions = vertexPositions;
+	vertUVs = vertexUVs;
+	vertNormals = vertexNormals;
+	vertTangents = vertexTangents;
+	vertBitangents = vertexBitangents;
+	
+	gl_Position = MVP * vec4( vertexPositions, 1);
+}

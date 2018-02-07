@@ -89,15 +89,15 @@ void ShaderUniform::SetValue(vec4 f)
 	glUniform4f(this->handle, f.x, f.y, f.z, f.w);
 }
 //int
-void ShaderUniform::SetValue(int i1, int i2)
+void ShaderUniform::SetValuei(int i1, int i2)
 {
 	glUniform2i(handle, i1, i2);
 }
-void ShaderUniform::SetValue(int i1, int i2, int i3) 
+void ShaderUniform::SetValuei(int i1, int i2, int i3) 
 {
 	glUniform3i(handle, i1, i2, i3);
 }
-void ShaderUniform::SetValue(int i1, int i2, int i3, int i4)
+void ShaderUniform::SetValuei(int i1, int i2, int i3, int i4)
 {
 	glUniform4i(handle, i1, i2, i3, i4);
 }
@@ -109,6 +109,15 @@ void ShaderUniform::SetValuei(int intVal)
 void ShaderUniform::SetValue(GLuint texture)
 {
 	glUniform1i(handle, texture);
+}
+void ShaderUniform::SetValue(GLuint texture, int texNum)
+{
+	//this should only need to be set once
+	if (setOnce)
+		return;
+
+	glUniform1i(handle, texNum);
+	setOnce = true;
 }
 void ShaderUniform::SetValue(mat4 matrix)
 {

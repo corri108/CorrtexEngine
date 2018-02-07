@@ -16,14 +16,24 @@ public:
 	virtual void Initialize();
 	virtual void AddTexture(char * textureLocation);
 	void AddTexture(GLuint textureLoc);
-	void SetShaderValues(mat4 mvp);
+	void SetShaderValues(mat4 mvp, mat4 view);
 	void SetShaderAttributes();
-	vector< glm::vec3 > vertices;
-	vector< glm::vec2 > uvs;
-	vector< glm::vec3 > normals;
+	virtual void ShaderInit();
+
+	//member variables
+	vector<glm::vec3> vertices;
+	vector<glm::vec2> uvs;
+	vector<glm::vec3> normals;
+	vector<glm::vec3> tangents;
+	vector<glm::vec3> bitangents;
+	vector<unsigned int> indicies;
+
 	GLuint vertexBuffer;
 	GLuint uvBuffer;
 	GLuint normalBuffer;
+	GLuint tangentBuffer;
+	GLuint bitangentBuffer;
+	GLuint indexBuffer;
 	GLuint texture;
 	bool useTextures = false;
 };

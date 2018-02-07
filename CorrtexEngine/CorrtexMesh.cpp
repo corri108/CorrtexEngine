@@ -19,19 +19,58 @@ CorrtexMesh::~CorrtexMesh()
 void CorrtexMesh::Initialize()
 {
 	printf("Vertex size: %d, UV size: %d, Normal size: %d\n", vertices.size(), uvs.size(), normals.size());
-	//vertex buffer
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	//uv buffer
-	glGenBuffers(1, &uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	//normal buffer
-	glGenBuffers(1, &normalBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+	if (this->shader == NULL)//no shader? just vertex buffer then.
+	{
+		//vertex buffer
+		glGenBuffers(1, &vertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	}
+	else
+	{
+		if (this->shader->HasAttribute(VERTEX))
+		{
+			//vertex buffer
+			glGenBuffers(1, &vertexBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+		}
+		if (this->shader->HasAttribute(UV))
+		{
+			//uv buffer
+			glGenBuffers(1, &uvBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+			glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+		}
+		if (this->shader->HasAttribute(NORMAL))
+		{
+			//normal buffer
+			glGenBuffers(1, &normalBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+			glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+		}
+		if (this->shader->HasAttribute(TANGENT))
+		{
+			glGenBuffers(1, &tangentBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, tangentBuffer);
+			glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(glm::vec3), &tangents[0], GL_STATIC_DRAW);
+		}
+		if (this->shader->HasAttribute(BITANGENT))
+		{
+			glGenBuffers(1, &bitangentBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
+			glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), &bitangents[0], GL_STATIC_DRAW);
+		}
+	}
+
+	if (indicies.size() > 0)
+	{
+		//lets try something new - index buffer!
+		glGenBuffers(1, &indexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(unsigned int), &indicies[0], GL_STATIC_DRAW);
+	}
 }
 
 void CorrtexMesh::AddTexture(char * textureLocation)
@@ -46,7 +85,16 @@ void CorrtexMesh::AddTexture(GLuint textureLoc)
 	this->useTextures = true;
 }
 
-void CorrtexMesh::SetShaderValues(mat4 mvp)
+void CorrtexMesh::ShaderInit()
+{
+	//compute bitangents and tangents if needed
+	if (this->shader->HasAttribute(TANGENT) && this->shader->HasAttribute(BITANGENT))
+	{
+		GameEngine::ComputeTangents(this->vertices, this->uvs, this->normals, this->tangents, this->bitangents);
+	}
+}
+
+void CorrtexMesh::SetShaderValues(mat4 mvp, mat4 view)
 {
 	//somehow deal with shader uniform 
 	LinkedList<ShaderUniform*> tempList = this->shader->GetUniforms();
@@ -77,6 +125,16 @@ void CorrtexMesh::SetShaderValues(mat4 mvp)
 				else if (attribName == "modelMatrix")
 				{
 					su->SetValue(model);
+				}
+				else if (attribName == "viewMatrix")
+				{
+					su->SetValue(view);
+				}
+				break;
+			case Matrix3x3: 
+				if (attribName == "MV3x3")
+				{
+					su->SetValue(mat3(view * model));
 				}
 				break;
 			case Float1:
@@ -123,6 +181,16 @@ void CorrtexMesh::SetShaderValues(mat4 mvp)
 				{
 					su->SetValue(this->texture);
 				}
+				if (this->material != NULL)
+				{
+					GLuint texExists = material->GetTexture(attribName);
+					int texNum = material->GetTextureNumber(attribName) - 1;
+
+					if (texExists != false)
+					{
+						su->SetValue(texExists, texNum);
+					}
+				}
 				break;
 			case Float2:
 				if (attribName == "texRatio")
@@ -143,6 +211,14 @@ void CorrtexMesh::SetShaderValues(mat4 mvp)
 				if (attribName == "cameraPosition")
 				{
 					su->SetValue(GameEngine::camera->cameraPosition);
+				}
+				if (attribName == "modelPosition")
+				{
+					su->SetValue(this->position);
+				}
+				if (attribName == "lightPosition")
+				{
+					su->SetValue(GameEngine::light1->lightPosition);
 				}
 
 				//mat stuff
@@ -187,15 +263,72 @@ void CorrtexMesh::SetShaderAttributes()
 
 	if (shader->HasAttribute(UV))
 	{
-		glEnable(GL_TEXTURE_2D);
 		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, this->uvBuffer);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-		//if different texture
-		if (this->useTextures)
+		if (this->material != NULL)
 		{
-			//glActiveTexture(GL_TEXTURE0);
+			for (const auto &myPair : this->material->textures)
+			{
+				const char *key = myPair.first;
+				int textureNumber = this->material->GetTextureNumber(key);
+				GLuint matTexture = this->material->GetTexture(key);
+
+				//are these valid?
+				if (textureNumber != -1)
+				{
+					switch (textureNumber)
+					{
+					case 1://tex
+						glActiveTexture(GL_TEXTURE0);
+						break;
+					case 2://tex
+						glActiveTexture(GL_TEXTURE1);
+						break;
+					case 3://tex
+						glActiveTexture(GL_TEXTURE2);
+						break;
+					case 4://tex
+						glActiveTexture(GL_TEXTURE3);
+						break;
+					case 5://tex
+						glActiveTexture(GL_TEXTURE4);
+						break;
+					case 6://tex
+						glActiveTexture(GL_TEXTURE5);
+						break;
+					case 7://tex
+						glActiveTexture(GL_TEXTURE6);
+						break;
+					case 8://tex
+						glActiveTexture(GL_TEXTURE7);
+						break;
+					case 9://tex
+						glActiveTexture(GL_TEXTURE8);
+						break;
+					case 10://tex
+						glActiveTexture(GL_TEXTURE9);
+						break;
+					case 11://tex
+						glActiveTexture(GL_TEXTURE10);
+						break;
+					case 12://tex
+						glActiveTexture(GL_TEXTURE11);
+						break;
+					case 13://tex
+						glActiveTexture(GL_TEXTURE12);
+						break;
+					}
+
+					//bind the texture
+					glBindTexture(GL_TEXTURE_2D, matTexture);
+				}
+			}
+		}
+		else if (this->useTextures)
+		{
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, this->texture);
 		}
 	}
@@ -205,6 +338,20 @@ void CorrtexMesh::SetShaderAttributes()
 		glEnableVertexAttribArray(3);
 		glBindBuffer(GL_ARRAY_BUFFER, this->normalBuffer);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	}
+
+	if (shader->HasAttribute(TANGENT))
+	{
+		glEnableVertexAttribArray(4);
+		glBindBuffer(GL_ARRAY_BUFFER, this->tangentBuffer);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	}
+
+	if (shader->HasAttribute(BITANGENT))
+	{
+		glEnableVertexAttribArray(5);
+		glBindBuffer(GL_ARRAY_BUFFER, this->bitangentBuffer);
+		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	}
 }
 
@@ -233,14 +380,16 @@ void CorrtexMesh::Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform)
 	else
 	{
 		this->shader->UseShader();
-		this->SetShaderValues(mvp);
+		this->SetShaderValues(mvp, view);
 		this->SetShaderAttributes();
-
 		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
-		this->GetErrorIfExists();
+		//this->GetErrorIfExists();
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(2);
 		glDisableVertexAttribArray(3);
+		glDisableVertexAttribArray(4);
+		glDisableVertexAttribArray(5);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }

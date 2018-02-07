@@ -22,6 +22,8 @@ uniform struct Light
 	vec3 coneDirection;
 } allLights[MAX_LIGHTS];
 
+float lodRange[4] = {9,60,100,250};
+
 in vec3 vertPositions;
 in vec2 vertUVs;
 in vec3 vertNormals;
@@ -84,8 +86,35 @@ void main()
 	vec3 normal = normalize(transpose(inverse(mat3(modelMatrix))) * vertNormals);
 	vec3 surfacePos = vec3(modelMatrix * vec4(vertPositions, 1));
 	vec2 adjustedVertUVs = vertUVs * texRatio;
-	vec4 surfaceColor = texture(tex, adjustedVertUVs);
 	vec3 surfaceToCamera = normalize(cameraPosition - surfacePos);
+		
+	//Basic LOD
+	float distanceToCamera = length(surfaceToCamera);
+	
+	vec2 tileScale = vec2 (1.0);
+	if (distanceToCamera < lodRange[0])
+	{
+		tileScale = texRatio * 5.0;
+	}
+	else if (distanceToCamera < lodRange[1])
+	{
+		tileScale = texRatio * 2.5;
+	}
+	else if (distanceToCamera < lodRange[2])
+	{
+		tileScale = texRatio * 1.5;
+	}
+	else if (distanceToCamera < lodRange[3])
+	{
+		tileScale = texRatio * 0.5;
+	}
+	else
+	{
+		tileScale = texRatio * 0.2;
+	}
+	
+	vec2 adjustedUVs = vertUVs * tileScale;
+	vec4 surfaceColor = texture(tex, adjustedUVs);
 		
 	vec3 linear = vec3 (0);
 	for ( int i = 0; i < numLights; ++i)

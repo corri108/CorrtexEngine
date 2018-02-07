@@ -20,6 +20,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include "VBOIndexer.h"
 #include "Game.h"
 
 class GameEngine
@@ -31,6 +32,8 @@ public:
 
 	//user functions
 	static void LoadModel(const char *filePath, std::vector<vec3> &out_verts, std::vector<vec2> &out_uvs, std::vector<vec3> &out_norms);
+	static void ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vector<vec3> in_norms,
+		vector<vec3> &out_tangents, vector<vec3> &out_bitangents);
 
 	//simple variables
 	bool gameOver = false;
@@ -51,6 +54,7 @@ public:
 	static ModelLoader *modelLoader;
 	static BMPLoader *imageLoader;
 	static CorrtexLight * light1;
+	static VBOIndexer *vboIndexer;
 	GLuint programID;
 	ShaderUniform *mvpUni;
 	GLFWwindow *window;

@@ -9,6 +9,7 @@ InputManager *GameEngine::input = NULL;
 ModelLoader *GameEngine::modelLoader = NULL;
 BMPLoader *GameEngine::imageLoader = NULL;
 CorrtexLight *GameEngine::light1 = NULL;
+VBOIndexer *GameEngine::vboIndexer = NULL;
 bool GameEngine::initLoaded = false;
 int GameEngine::lightCount = 0;
 bool GameEngine::showFPS = true;
@@ -27,6 +28,41 @@ GameEngine::~GameEngine()
 void GameEngine::LoadModel(const char *filePath, std::vector<vec3> &out_verts, std::vector<vec2> &out_uvs, std::vector<vec3> &out_norms)
 {
 	modelLoader->LoadOBJ(filePath, out_verts, out_uvs, out_norms);
+}
+
+void GameEngine::ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vector<vec3> in_norms,
+	vector<vec3> &out_tangents, vector<vec3> &out_bitangents)
+{
+	//go through each tri
+	for (int i = 0; i < in_verts.size(); i += 3)
+	{
+		vec3 &v0 = in_verts[i];
+		vec3 &v1 = in_verts[i + 1];
+		vec3 &v2 = in_verts[i + 2];
+
+		vec2 &uv0 = in_uvs[i];
+		vec2 &uv1 = in_uvs[i + 1];
+		vec2 &uv2 = in_uvs[i + 2];
+
+		vec3 delta_pos1 = v1 - v0;
+		vec3 delta_pos2 = v2 - v0;
+
+		vec2 delta_uv1 = uv1 = uv0;
+		vec2 delta_uv2 = uv2 - uv0;
+
+		//compute tangents and bitangents
+		float r = 1.0f / (delta_uv1.x * delta_uv2.y - delta_uv1.y * delta_uv2.x);
+		vec3 tangent = (delta_pos1 * delta_uv2.y - delta_pos2 * delta_uv1.y) * r;
+		vec3 bitangent = (delta_pos2 * delta_uv1.x - delta_pos1 * delta_uv2.x) * r;
+
+		out_tangents.push_back(tangent);
+		out_tangents.push_back(tangent);
+		out_tangents.push_back(tangent);
+
+		out_bitangents.push_back(bitangent);
+		out_bitangents.push_back(bitangent);
+		out_bitangents.push_back(bitangent);
+	}
 }
 
 //very internal functions
@@ -173,8 +209,6 @@ void GameEngine::FPSCounter()
 		fpsFrameNum = 0;
 		fpsLastTime += 1.0;
 	}
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void GameEngine::Init()
@@ -189,7 +223,8 @@ void GameEngine::Init()
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
 	modelLoader = new ModelLoader();
 	imageLoader = new BMPLoader();
-	light1 = new CorrtexLight(vec4(5, 4, 0, 0), 0.08f * vec3(1, 1, 1));
+	light1 = new CorrtexLight(vec4(5, 4, 0, 0), 0.88f * vec3(1, 1, 1));
+	vboIndexer = new VBOIndexer();
 	fpsLastTime = glfwGetTime();
 	fpsFrameNum = 0;
 	//CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 1 * vec3(0, 0, 1));//blue spot light
@@ -230,6 +265,11 @@ void GameEngine::Draw()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glUseProgram(programID);
+
+	if (this->wireframeOn)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//camera->Update(time, *input);
 
