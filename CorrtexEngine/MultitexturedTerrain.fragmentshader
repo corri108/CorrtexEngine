@@ -15,6 +15,7 @@ uniform sampler2D tex_normal2;
 uniform sampler2D tex_normal3;
 uniform sampler2D tex_normal4;
 uniform vec2 texRatio = vec2(1,1);
+const float blendDistance = 7.0;
 //specular stuff
 uniform float ambientIntensity;
 uniform float shininess;
@@ -32,7 +33,7 @@ uniform struct Light
 	vec3 coneDirection;
 } allLights[MAX_LIGHTS];
 
-float terrainRange[4] = float[](-100,2,17,32);
+float terrainRange[4] = float[](-100,0,35,55);
 vec4 surface_color_normal = vec4 (1);
 
 in vec3 vertPositions;
@@ -102,41 +103,41 @@ vec4 ChooseTexture( float vertexHeight, vec2 uvs, float terrainHeight)
 	vec4 n3 = texture(tex_normal3, uvs);
 	vec4 n4 = texture(tex_normal4, uvs);
 	
-	if (vertexHeight > terrainRange[3] + 2 + terrainHeight)//snow
+	if (vertexHeight > terrainRange[3] + blendDistance + terrainHeight)//snow
 	{
 		surfaceColor = t4;
 		surface_color_normal = n4;
 	}
 	else if (vertexHeight > terrainRange[3] + terrainHeight)//rock->snow
 	{
-		float r = terrainRange[3] + 2 - vertexHeight + terrainHeight;
-		r = r/2;
+		float r = terrainRange[3] + blendDistance - vertexHeight + terrainHeight;
+		r = r/blendDistance;
 		
 		surfaceColor = mix(t4, t3, r);
 		surface_color_normal = mix(n4, n3, r);
 	}
-	else if (vertexHeight > terrainRange[2] + 2 + terrainHeight)//rock
+	else if (vertexHeight > terrainRange[2] + blendDistance + terrainHeight)//rock
 	{
 		surfaceColor = t3;
 		surface_color_normal = n3;
 	}
 	else if (vertexHeight >= terrainRange[2] + terrainHeight)//grass->rock
 	{
-		float r = terrainRange[2] + 2 - vertexHeight + terrainHeight;
-		r = r/2;
+		float r = terrainRange[2] + blendDistance - vertexHeight + terrainHeight;
+		r = r/blendDistance;
 		
 		surfaceColor = mix(t3, t2, r);
 		surface_color_normal = mix(n3, n2, r);
 	}
-	else if (vertexHeight  > terrainRange[1] + 2 + terrainHeight)//grass
+	else if (vertexHeight  > terrainRange[1] + blendDistance + terrainHeight)//grass
 	{
 		surfaceColor = t2;
 		surface_color_normal = n2;
 	}
 	else if (vertexHeight > terrainRange[1] + terrainHeight)//water->grass
 	{
-		float r = terrainRange[1] + 2 - vertexHeight + terrainHeight;
-		r = r/2;
+		float r = terrainRange[1] + blendDistance - vertexHeight + terrainHeight;
+		r = r/blendDistance;
 		
 		surfaceColor = mix(t2, t1, r);
 		surface_color_normal = mix(n2, n1, r);

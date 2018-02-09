@@ -225,6 +225,14 @@ void CorrtexMesh::SetShaderValues(mat4 mvp, mat4 view)
 						su->SetValue(GameEngine::light1->attenuation);
 					}
 				}
+				else if (attribName == "nearPlane")
+				{
+					su->SetValue(GameEngine::camera->nearPlane);
+				}
+				else if (attribName == "farPlane")
+				{
+					su->SetValue(GameEngine::camera->farPlane);
+				}
 				break;
 			case Texture:
 				if (attribName == "texture")
@@ -434,6 +442,13 @@ void CorrtexMesh::Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform)
 
 	else
 	{
+		//use alpha blending?
+		if (this->material->useAlphaBlending)
+		{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+
 		this->shader->UseShader();
 		this->SetShaderValues(mvp, view);
 		this->SetShaderAttributes();
@@ -465,5 +480,11 @@ void CorrtexMesh::Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform)
 		glDisableVertexAttribArray(4);
 		glDisableVertexAttribArray(5);
 		//glDisable(GL_TEXTURE_2D);
+
+		//use alpha blending?
+		if (this->material->useAlphaBlending)
+		{
+			glDisable(GL_BLEND);
+		}
 	}
 }

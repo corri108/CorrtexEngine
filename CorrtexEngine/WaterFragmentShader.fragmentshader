@@ -1,27 +1,79 @@
 #version 330 core
 
+//in and out
 in vec4 clipSpace;
 in vec2 texCoords;
+in vec3 vertexToCamera;
+in vec3 worldPositionVertex;
 out vec4 fragColor;
 
+//uniforms
 uniform sampler2D tex;//reflection
 uniform sampler2D tex2;//refraction
 uniform sampler2D dudv;//dudv
+uniform sampler2D normal;
+uniform sampler2D depth;
+uniform vec4 clippingPlane;
 
 uniform float waveTime;
 uniform float waveStrength = 5;
+uniform float shininess;
+uniform float nearPlane;
+uniform float farPlane;
+const float dampen = 0.2;
+uniform vec3 specularColor;
+
+//lights!
+#define MAX_LIGHTS 10
+uniform int numLights = 1;
+uniform struct Light
+{
+	//standard light stuff
+	vec4 pos;
+	vec3 color;
+	float attenuation;
+	float coneAngle;
+	vec3 coneDirection;
+} allLights[MAX_LIGHTS];
+
+vec3 applyLight(Light light, vec3 normal)
+{
+	vec3 lightPos = light.pos.xyz;
+	if (light.pos.w == 0)//dir light
+	{
+		lightPos = normalize(lightPos);
+	}
+		
+	vec3 fromLight = worldPositionVertex - lightPos;
+	vec3 reflectedLight = reflect(normalize(fromLight), normal);
+	float spec = max(dot(reflectedLight, vertexToCamera), 0.0);
+	spec = pow(spec, dampen);
+	return mix(light.color, specularColor, 0.5) * spec * shininess;
+}
 
 void main()
 {
+	//normalized device coords
 	vec2 ndc = (clipSpace.xy / clipSpace.w) / 2.0 + 0.5 ;
 	vec2 reflectTexCoord = vec2 (ndc.x, -ndc.y);
 	vec2 refractTexCoord = ndc.xy;
 	
-	vec2 distortion1 = (texture(dudv, vec2 (texCoords.x + waveTime, texCoords.y)).rg * 2.0 - 1.0 ) * waveStrength;
-	vec2 distortion2 = (texture(dudv, vec2 (-texCoords.x + waveTime, texCoords.y + waveTime)).rg * 2.0 - 1.0 ) * waveStrength;
+	//use depth texture to get distance to floor
+	float depthAmt = texture(depth, refractTexCoord).r;
+	float floorDistance = 2.0 * nearPlane * farPlane / (farPlane + nearPlane - (2.0 * depthAmt - 1.0) * (farPlane - nearPlane));
+	//use frag coord to get distance to water
+	depthAmt = gl_FragCoord.z;
+	float waterDistance = 2.0 * nearPlane * farPlane / (farPlane + nearPlane - (2.0 * depthAmt - 1.0) * (farPlane - nearPlane));
 	
-	vec2 distortion  = distortion1 + distortion2;
+	//water to floor
+	float waterToFloor = floorDistance - waterDistance;
 	
+	//distorted coords and distortion
+	vec2 distortedTexCoord = texture(dudv, vec2(texCoords.x + waveTime, texCoords.y)).rg * 0.1;
+	distortedTexCoord = texCoords + vec2(distortedTexCoord.x, distortedTexCoord.y + waveTime);
+	vec2 distortion  = (texture(dudv, distortedTexCoord).rg * 2.0 - 1.0) * waveStrength * clamp(waterToFloor / 50.0 , 0.0 , 1.0 );;
+	
+	//add distortion to reflect and refract coords
 	reflectTexCoord += distortion;
 	reflectTexCoord.x = clamp(reflectTexCoord.x, 0.0001 , 0.9999 );
 	reflectTexCoord.y = clamp(reflectTexCoord.y, -0.9999 , -0.0001 );
@@ -29,9 +81,31 @@ void main()
 	refractTexCoord += distortion;
 	refractTexCoord = clamp(refractTexCoord, 0.0001 , 0.9999 );
 	
+	//make color of reflect tex and refract tex using distorted coords
 	vec4 reflectionTex = texture(tex, reflectTexCoord);
 	vec4 refractionTex = texture(tex2, refractTexCoord);
 	
-	fragColor = mix(reflectionTex, refractionTex, 0.5 );
-	fragColor = mix(fragColor, vec4 (0.0, 0.2, 0.5, 1.0), 0.25 );
+	//normals!
+	vec4 normalMapColor = texture(normal, distortedTexCoord);
+	vec3 normal = vec3 (normalMapColor.r * 2.0 - 1.0, normalMapColor.g, normalMapColor.b * 2.0 - 1.0);
+	normal = normalize(normal);
+	
+	//fresnel effect using clipping plane and viewing angle
+	vec3 planeNormalAbs = vec3 (clippingPlane.x, abs(clippingPlane.y), clippingPlane.z);
+	float fresnelFactor = dot(normalize(vertexToCamera), normalize(vec3(normal.x, normal.y * 15, normal.z)));
+	fresnelFactor = pow(fresnelFactor, 1.75 );
+	
+	vec3 specular = vec3 (0);
+	
+	for (int i = 0; i < numLights; ++i)
+	{
+		specular += applyLight(allLights[i], normal);
+	}
+	
+	//final color
+	fragColor = mix(reflectionTex, refractionTex, fresnelFactor );
+	fragColor = mix(fragColor, vec4 (0.0, 0.3, 0.6, 1.0), 0.25 ) + vec4(specular, 0.0);
+	fragColor.a = clamp(waterToFloor / 11.0 , 0.0 , 1.0 );
+	//test depth
+	//fragColor = vec4(waterToFloor / 100.0);
 }

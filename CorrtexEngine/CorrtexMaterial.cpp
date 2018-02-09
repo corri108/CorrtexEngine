@@ -12,6 +12,7 @@ CorrtexMaterial::CorrtexMaterial(float ambient, float shininess, vec3 spec)
 	this->shininess = shininess;
 	this->specularColor = spec;
 	this->textures = std::map<const char *, TextureHolder>();
+	useAlphaBlending = false;
 }
 
 CorrtexMaterial::~CorrtexMaterial()

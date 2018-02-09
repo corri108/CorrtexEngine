@@ -31,7 +31,11 @@ void Game::Init()
 	waterShader->AddUniforms(Matrix4x4, "MVP", Matrix4x4, "modelMatrix", Texture, "tex");
 	waterShader->AddUniforms(Texture, "tex2", Float4, "clippingPlane", Float2, "texRatio");
 	waterShader->AddUniforms(Float1, "time", Float1, "waveTime", Float1, "waveStrength");
-	waterShader->AddUniform(Texture, "dudv");
+	waterShader->AddUniforms(Texture, "dudv", Texture, "normal", Float3, "cameraPosition");
+	waterShader->AddUniformsArray(Float4, "allLights", "pos", Float3, "allLights", "color", Float1, "allLights", "attenuation");
+	waterShader->AddUniformsArray(Float1, "allLights", "coneAngle", Float3, "allLights", "coneDirection");
+	waterShader->AddUniforms(Float1, "numLights", Float1, "shininess", Float3, "specularColor");
+	waterShader->AddUniforms(Texture, "depth", Float1, "nearPlane", Float1, "farPlane");
 
 	//multitextured terrain
 	CorrtexShader *multitexturedTerrainShader = new CorrtexShader("MultitexturedTerrain.vertexshader", "MultitexturedTerrain.fragmentshader");
@@ -123,18 +127,21 @@ void Game::Init()
 	//mesh->SetMaterial(testMat);
 
 	GLuint skysphereTex = GameEngine::imageLoader->LoadBMP("Assets/skysphere.bmp");
-	CorrtexMaterial *skysphereMat = new CorrtexMaterial(0.1f, 0.2f, vec3(0.9f, 0.11f, 0.33f));
+	CorrtexMaterial *skysphereMat = new CorrtexMaterial(0.075f, 0.2f, vec3(0.9f, 0.11f, 0.33f));
 	skysphereMat->AddTexture("tex", skysphereTex, 1);
 
 	dudvTexture = GameEngine::imageLoader->LoadBMP("Assets/dudv.bmp");
 	blackTexture = GameEngine::imageLoader->LoadBMP("Assets/black.bmp");
 	CorrtexWater *cw = new CorrtexWater(vec3(0, 5, 0));
 
-	CorrtexMaterial *waterMat = new CorrtexMaterial(0.1f, 0.2f, vec3(0.9f, 0.11f, 0.33f));
+	CorrtexMaterial *waterMat = new CorrtexMaterial(0.1f, 0.2f, vec3(0.1f, 0.66f, 0.82f));
 	waterMat->AddTexture("tex", cw->reflectionTexture, 1);
 	waterMat->AddTexture("tex2", cw->refractionTexture, 2);
-	waterMat->AddTexture("dudv", dudvTexture, 4);
-	waterMat->uvScale = vec2(3, 3);
+	waterMat->AddTexture("dudv", dudvTexture, 3);
+	waterMat->AddTexture("normal", waterTexture_normal, 4);
+	waterMat->AddTexture("depth", cw->refractionDepthTexture, 5);
+	waterMat->uvScale = vec2(12, 12);
+	waterMat->useAlphaBlending = true;
 
 	skysphere = new CorrtexMesh(vec3(0, 0, 0), "Assets/skysphere.obj");
 	skysphere->SetScale(25);
@@ -143,10 +150,10 @@ void Game::Init()
 	skysphere->useIndexing = false;
 	skysphere->name = "Skysphere";
 
-	terrain = new CorrtexMesh(vec3(0, -40, 0), "Assets/terrain2.obj");
+	terrain = new CorrtexMesh(vec3(0, -50, 0), "Assets/terrain2.obj");
 	terrain->SetShader(multitexturedTerrainShader);
 	terrain->SetMaterial(terrainGrassMaterial);
-	terrain->scale = vec3(1, 1, 1);
+	terrain->scale = vec3(2, 2, 2);
 	terrain->useIndexing = false;
 	terrain->name = "Terrain";
 
@@ -160,6 +167,8 @@ void Game::Init()
 	water->name = "WaterPlane";
 }
 float v = 0.0005f;
+float lightX = 0.0f;
+int day = 1;
 void Game::Update(float time, int frame)
 {
 	if (GameEngine::input->GetKey("Up", Down))
@@ -187,7 +196,17 @@ void Game::Update(float time, int frame)
 		water->material->uvScale += v * 10;
 	}
 
-	//skysphere->yaw = 0.00025;
+	//day night cycle
+	skysphere->yaw = 0.00025;
+	GameEngine::light1->lightPosition.x = sinf(time / 3.0f) * 10;
+	GameEngine::light1->lightPosition.y = cosf(time / 3.0f) * 10;
+
+	if (GameEngine::light1->lightPosition.x >= 0.0f && lightX < 0.0f)
+	{
+		day++;
+	}
+
+	lightX = GameEngine::light1->lightPosition.x;
 
 	if (GameEngine::input->GetKey("1", Trigger))
 		GameEngine::wireframeOn = !GameEngine::wireframeOn;

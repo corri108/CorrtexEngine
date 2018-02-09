@@ -318,7 +318,7 @@ void GameEngine::Init()
 	aspectRatio = (float)width / (float)height;
 
 
-	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
+	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", true);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 	objectList = new LinkedList<CorrtexObject*>();
 	lights = new LinkedList<CorrtexLight*>();
@@ -329,7 +329,7 @@ void GameEngine::Init()
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
 	modelLoader = new ModelLoader();
 	imageLoader = new BMPLoader();
-	light1 = new CorrtexLight(vec4(5, 4, 0, 0), 0.88f * vec3(1, 1, 1));
+	light1 = new CorrtexLight(vec4(0, 0, 0, 0), 0.88f * vec3(1, 1, 1));
 	vboIndexer = new VBOIndexer();
 	fpsLastTime = glfwGetTime();
 	fpsFrameNum = 0;
@@ -473,8 +473,8 @@ void GameEngine::FBOObjectsDraw()
 	{
 		glEnable(GL_CLIP_DISTANCE0);
 
-		DoReflection(waterPos);
-		DoRefraction(waterPos);
+		DoReflection(waterPos );
+		DoRefraction(waterPos + 1);
 
 		//unbind the current buffer before we draw the actual scene.
 		this->UnbindCurrentFrameBuffer();
@@ -490,6 +490,7 @@ void GameEngine::FBOObjectsDraw()
 		{
 			objectList->Get(i)->material->UpdateTexture("tex", waterObject->reflectionTexture);
 			objectList->Get(i)->material->UpdateTexture("tex2", waterObject->refractionTexture);
+			objectList->Get(i)->material->UpdateTexture("depth", waterObject->refractionDepthTexture);
 		}
 	}
 }

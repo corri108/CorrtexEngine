@@ -26,6 +26,7 @@ public:
 	vec3 specularColor = vec3(0.22f, 0.12f, 0.35f);
 	vec2 uvScale = vec2(1.0f, 1.0f);
 	std::map<const char *, TextureHolder> textures;
+	bool useAlphaBlending = false;
 
 private:
 	int totalTexNum = 0;
