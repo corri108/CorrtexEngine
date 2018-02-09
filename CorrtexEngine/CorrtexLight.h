@@ -1,14 +1,14 @@
 #pragma once
-#include "CorrtexCube.h"
+
+#include <glm\ext.hpp>
 using namespace glm;
 
-class CorrtexLight : public CorrtexCube
+class CorrtexLight
 {
 public:
 	CorrtexLight();
 	CorrtexLight(vec4 pos, vec3 col);
 	~CorrtexLight();
-	virtual void Update(float time);
 	vec4 lightPosition;
 	vec3 lightColor;
 	float attenuation = 0.1f;

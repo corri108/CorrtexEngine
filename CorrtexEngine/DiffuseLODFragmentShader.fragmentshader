@@ -17,7 +17,7 @@ uniform struct Light
 	vec3 coneDirection;
 } allLights[MAX_LIGHTS];
 
-float lodRange[4] = {9,60,100,250};
+float lodRange[4] = float[](9,60,100,250);
 
 in vec3 vertPositions;
 in vec2 vertUVs;

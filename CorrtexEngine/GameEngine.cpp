@@ -9,11 +9,18 @@ InputManager *GameEngine::input = NULL;
 ModelLoader *GameEngine::modelLoader = NULL;
 BMPLoader *GameEngine::imageLoader = NULL;
 CorrtexLight *GameEngine::light1 = NULL;
+CorrtexWater *GameEngine::waterObject = NULL;
 VBOIndexer *GameEngine::vboIndexer = NULL;
 bool GameEngine::initLoaded = false;
 int GameEngine::lightCount = 0;
 bool GameEngine::showFPS = true;
 bool GameEngine::wireframeOn = false;
+float GameEngine::width = 0;
+float GameEngine::height = 0;
+float GameEngine::time = 0.0f;
+float GameEngine::timeStep = 0.016666666f;//1/60th of sec
+float GameEngine::timeMod = 0.0f;
+vec4 GameEngine::clippingPlane = vec4(0, -1, 0, 10000000000);
 
 GameEngine::GameEngine()
 {
@@ -65,20 +72,115 @@ void GameEngine::ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vec
 	}
 }
 
+int GameEngine::GetWindowWidth()
+{
+	return (int)width;
+}
+
+int GameEngine::GetWindowHeight()
+{
+	return (int)height;
+}
+
+void GameEngine::BindFrameBuffer(GLuint frameBuffer, int w, int h)
+{
+	glBindTexture(GL_TEXTURE_2D, 0);//make sure no texture is bound
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glViewport(0, 0, w, h);
+}
+
+void GameEngine::UnbindCurrentFrameBuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width, height);
+}
+
+GLuint GameEngine::GenColorTexture(int w, int h)
+{
+	// The texture we're going to render to
+	GLuint renderedTexture;
+	glGenTextures(1, &renderedTexture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+	// Give an empty image to OpenGL ( the last "0" )
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h,
+		0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Poor filtering. Needed !
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
+
+	return renderedTexture;
+}
+
+GLuint GameEngine::GenDepthTexture(int w, int h)
+{
+	// The texture we're going to render to
+	GLuint renderedTexture;
+	glGenTextures(1, &renderedTexture);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+	// Give an empty image to OpenGL ( the last "0" )
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h,
+		0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+	// Poor filtering. Needed !
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, renderedTexture, 0);
+
+	return renderedTexture;
+}
+
+GLuint GameEngine::GenDepthBuffer(int w, int h)
+{
+	GLuint depthBuffer;
+	glGenRenderbuffers(1, &depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+	return depthBuffer;
+}
+
+GLuint GameEngine::GenFrameBuffer()
+{
+	GLuint frameBuffer;
+	glGenFramebuffers(1, &frameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	return frameBuffer;
+}
+
 //very internal functions
 GLFWwindow* GameEngine::WindowInit(int w, int h, char windowTitle[], bool fullscreen)
 {
-	if (glfwInit() != GLFW_TRUE)
+	GLenum glfwErr = glfwInit();
+
+	if (glfwErr != GLFW_TRUE)
 	{
 		fprintf(stderr, "Couldn't initialize glfw\n");
 		return NULL;
 	}
 
-	GLFWwindow *window = glfwCreateWindow(w, h, windowTitle, fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
-	glfwMakeContextCurrent(window);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_DECORATED, 1);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+	GLFWwindow *window = glfwCreateWindow(w, h, windowTitle, fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+
+	glfwMakeContextCurrent(window);
+
+	printf("Version: %s\n", glGetString(GL_VERSION));
+	printf("Device: %s\n", glGetString(GL_RENDERER));
 
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
@@ -160,8 +262,6 @@ GLuint GameEngine::LoadShaders(const char * vertex_file_path, const char * fragm
 		printf("%s\n", &FragmentShaderErrorMessage[0]);
 	}
 
-
-
 	// Link the program
 	printf("Linking program\n");
 	GLuint ProgramID = glCreateProgram();
@@ -213,12 +313,18 @@ void GameEngine::FPSCounter()
 
 void GameEngine::Init()
 {
+	width = 1600;
+	height = 900;
+	aspectRatio = (float)width / (float)height;
+
+
 	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 	objectList = new LinkedList<CorrtexObject*>();
 	lights = new LinkedList<CorrtexLight*>();
 	//camera, input & model view projection matrix handle
-	camera = new CorrtexFPSCamera(0.01f, 500.0f, aspectRatio, 50.0f);
+	camera = new CorrtexFPSCamera(0.01f, 2000.0f, aspectRatio, 50.0f);
+	camera->cameraPosition = vec3(-230, 150, -230);
 	input = new InputManager(window);
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
 	modelLoader = new ModelLoader();
@@ -257,13 +363,42 @@ void GameEngine::Update()
 	}
 }
 
-void GameEngine::Draw()
+void GameEngine::UpdateDisplay()
 {
+	//poll events and swap buffers
+	glfwPollEvents();
+	glfwSwapBuffers(window);
+
+	//increase time
+	time += timeStep;
+
+	//deal with modTime (time that is always from 0->1)
+	timeMod += timeStep;
+	if (timeMod >= 1.0f)
+		timeMod -= 1.0f;
+
+	//increase frame
+	frame++;
+
+	//update input
+	input->UpdateLast();
+
+	//gameover
+	gameOver = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS ||
+		glfwWindowShouldClose(window) != 0;
+}
+
+void GameEngine::DrawScene()
+{
+	int currentFrameBuffer;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFrameBuffer);
+
 	this->FPSCounter();
 	glClearColor(0.4f, 0.6f, 0.8f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
 	glUseProgram(programID);
 
 	if (this->wireframeOn)
@@ -273,25 +408,90 @@ void GameEngine::Draw()
 
 	//camera->Update(time, *input);
 
+	//draw every object in the object list
 	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
-		glUseProgram(programID);//set default shader for those objects without shaders
-		objectList->Get(i)->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
+		//get pointer to current object
+		CorrtexObject *o = objectList->Get(i);
+
+		if (dynamic_cast<CorrtexWater*>(o) == nullptr)
+		{
+			if (currentFrameBuffer == 0 || o->renderOtherBuffers)
+			{
+				glUseProgram(programID);//set default shader for those objects without shaders
+				o->Draw(camera->GetViewMatrix(), camera->GetProjectionMatrix(), *mvpUni);
+			}
+		}
+	}
+}
+
+void GameEngine::DoReflection(float waterHeight)
+{
+	///////////////////////////////////////////////////////////////////////
+	//REFLECTION
+	///////////////////////////////////////////////////////////////////////
+
+	//set clipping plane
+	clippingPlane = vec4(0, 1, 0, -waterHeight);
+
+	//move camera
+	float distance = 2 * (camera->cameraPosition.y - waterHeight);
+
+	camera->cameraPosition.y -= distance;
+	camera->InvertPitch();
+
+	//bind buffer and draw scene
+	waterObject->BindReflectionFrameBuffer();
+	DrawScene();
+
+	//move camera back
+	camera->InvertPitch();
+	camera->cameraPosition.y += distance;
+}
+
+void GameEngine::DoRefraction(float waterHeight)
+{
+	///////////////////////////////////////////////////////////////////////
+	//REFRACTION
+	///////////////////////////////////////////////////////////////////////
+
+	//set clipping plane
+	clippingPlane = vec4(0, -1, 0, waterHeight);
+
+	//bind buffer and draw scene
+	waterObject->BindRefractionFrameBuffer();
+	DrawScene();
+}
+
+void GameEngine::FBOObjectsDraw()
+{
+	//if we have water
+	int waterPos = -35;
+
+	if (waterObject != NULL)
+	{
+		glEnable(GL_CLIP_DISTANCE0);
+
+		DoReflection(waterPos);
+		DoRefraction(waterPos);
+
+		//unbind the current buffer before we draw the actual scene.
+		this->UnbindCurrentFrameBuffer();
+		glDisable(GL_CLIP_DISTANCE0);
+		clippingPlane.w = 100000000000;
 	}
 
-	glfwSwapBuffers(window);
-	glfwPollEvents();
-
-	time += timeStep;
-	frame++;
-
-	input->UpdateLast();
-
-	//gameover
-	gameOver = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS ||
-		glfwWindowShouldClose(window) != 0;
-
+	//update textures onto object
+	int sz = objectList->Count();
+	for (int i = 0; i < sz; ++i)
+	{
+		if (objectList->Get(i)->name == "WaterPlane")
+		{
+			objectList->Get(i)->material->UpdateTexture("tex", waterObject->reflectionTexture);
+			objectList->Get(i)->material->UpdateTexture("tex2", waterObject->refractionTexture);
+		}
+	}
 }
 
 void GameEngine::Run()
@@ -300,7 +500,16 @@ void GameEngine::Run()
 
 	while (!gameOver)
 	{
+		//update func
 		Update();
-		Draw();
+
+		//special materials needing FBO will draw here
+		FBOObjectsDraw();
+
+		//draw the scene
+		DrawScene();
+
+		//update the display(swap buffers)
+		UpdateDisplay();
 	}
 }

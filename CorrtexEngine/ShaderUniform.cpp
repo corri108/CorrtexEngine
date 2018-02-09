@@ -113,8 +113,8 @@ void ShaderUniform::SetValue(GLuint texture)
 void ShaderUniform::SetValue(GLuint texture, int texNum)
 {
 	//this should only need to be set once
-	if (setOnce)
-		return;
+	//if (setOnce)
+		//return;
 
 	glUniform1i(handle, texNum);
 	setOnce = true;

@@ -22,6 +22,8 @@ public:
 	virtual void SetShader(CorrtexShader &shader);
 	virtual void SetMaterial(CorrtexMaterial *mat);
 	virtual void SetMaterial(CorrtexMaterial &mat);
+	//controls weather or not this object will be drawn when rendering the scene to a different buffer (like for water)
+	bool renderOtherBuffers = true;
 	virtual void ShaderInit();
 	~CorrtexObject();
 	typedef void(CorrtexObject::*CorrtexBehaviour)(CorrtexObject);

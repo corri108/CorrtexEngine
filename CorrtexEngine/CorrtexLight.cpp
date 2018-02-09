@@ -13,7 +13,6 @@ CorrtexLight::CorrtexLight(vec4 pos, vec3 col)
 {
 	this->lightPosition = pos;
 	this->lightColor = col;
-	this->SetScale(0.05f);
 	GameEngine::lightCount++;
 	GameEngine::lights->Add(this);
 }
@@ -22,9 +21,4 @@ CorrtexLight::CorrtexLight(vec4 pos, vec3 col)
 CorrtexLight::~CorrtexLight()
 {
 
-}
-
-void CorrtexLight::Update(float time)
-{
-	this->position = this->lightPosition;
 }

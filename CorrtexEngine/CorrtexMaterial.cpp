@@ -52,6 +52,21 @@ void CorrtexMaterial::AddTexture(const char *texName, GLuint texValue, int texNu
 	}
 }
 
+void CorrtexMaterial::UpdateTexture(const char *texName, GLuint texValue)
+{
+	if (this->textures.find(texName) == this->textures.end())
+	{
+		//error! we cant update a texture that doesnt exist.
+		printf("Error! Cannot update a texture that doesn't exist.\n");
+	}
+	else
+	{
+		TextureHolder prev = this->textures[texName];
+		prev.texture = texValue;
+		this->textures[texName] = prev;
+	}
+}
+
 GLuint CorrtexMaterial::GetTexture(const char * texName)
 {
 	//only return texture if it exists in the map

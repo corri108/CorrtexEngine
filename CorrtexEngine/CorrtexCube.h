@@ -3,6 +3,7 @@
 #include "glew.h"
 #include <glm/ext.hpp>
 #include "CorrtexPrimitive.h"
+
 using namespace glm;
 
 class CorrtexCube : public CorrtexPrimitive

@@ -2,6 +2,8 @@
 #include "glew.h"
 #include "glm\ext.hpp"
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 using namespace glm;

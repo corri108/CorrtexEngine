@@ -18,11 +18,14 @@ CorrtexFPSCamera::CorrtexFPSCamera(float near, float far, float aspect, float fo
 	this->translation = mat4(1.0f);
 }
 
-
-
 CorrtexFPSCamera::~CorrtexFPSCamera()
 {
 
+}
+
+void CorrtexFPSCamera::InvertPitch()
+{
+	pitch = -pitch;
 }
 
 void CorrtexFPSCamera::Update(float time, InputManager &input)
@@ -95,7 +98,7 @@ void CorrtexFPSCamera::TranslationInput(float time, InputManager &input)
 		moved = true;
 	}
 
-	const float speed = 0.005f;
+	const float speed = 0.05f;
 
 	if (moved)
 	{

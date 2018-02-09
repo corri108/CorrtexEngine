@@ -1,27 +1,13 @@
 #pragma once
-#include "stdafx.h"
-#include "glew.h"
-#include "CorrtexDebug.h"
-#include "glfw3.h"
-#include "CorrtexCube.h"
+#include <glew.h>
 #include "LinkedList.h"
-#include "CorrtexLight.h"
 #include "BMPLoader.h"
+#include "CorrtexLight.h"
+#include "CorrtexWater.h"
 #include "CorrtexFPSCamera.h"
-#include "InputManager.h"
 #include "CorrtexRandom.h"
 #include "ModelLoader.h"
-#include "CorrtexDelegate.h"
-#include "CorrtexShader.h"
-#include "CorrtexQuad.h"
-#include "CorrtexTetrahedron.h"
-#include "CorrtexMesh.h"
-#include <glm/ext.hpp>
-#include <vector>
-#include <fstream>
-#include <sstream>
 #include "VBOIndexer.h"
-#include "Game.h"
 
 class GameEngine
 {
@@ -34,12 +20,22 @@ public:
 	static void LoadModel(const char *filePath, std::vector<vec3> &out_verts, std::vector<vec2> &out_uvs, std::vector<vec3> &out_norms);
 	static void ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vector<vec3> in_norms,
 		vector<vec3> &out_tangents, vector<vec3> &out_bitangents);
+	static int GetWindowWidth();
+	static int GetWindowHeight();
+	//buffer stuff
+	static void BindFrameBuffer(GLuint frameBuffer, int w, int h);
+	static void UnbindCurrentFrameBuffer();
+	static GLuint GenColorTexture(int w, int h);
+	static GLuint GenDepthTexture(int w, int h);
+	static GLuint GenDepthBuffer(int w, int h);
+	static GLuint GenFrameBuffer();
 
 	//simple variables
 	bool gameOver = false;
-	float width = 1600, height = 1000;
-	float time = 0.0f;
-	float timeStep = 10.0f;
+	static float width, height;
+	static float time;
+	static float timeMod;
+	static float timeStep;//1/60th of sec
 	int frame = 0;
 	float aspectRatio = width / height;
 	static bool initLoaded;
@@ -55,6 +51,8 @@ public:
 	static BMPLoader *imageLoader;
 	static CorrtexLight * light1;
 	static VBOIndexer *vboIndexer;
+	static CorrtexWater *waterObject;
+	static vec4 clippingPlane;
 	GLuint programID;
 	ShaderUniform *mvpUni;
 	GLFWwindow *window;
@@ -72,7 +70,11 @@ protected:
 	//internal
 	void Init();
 	void Update();
-	void Draw();
+	void DrawScene();
+	void FBOObjectsDraw();
+	void DoReflection(float waterHeight);
+	void DoRefraction(float waterHeight);
+	void UpdateDisplay();
 	void FPSCounter();
 	double fpsLastTime = 0.0;
 	int fpsFrameNum = 0;

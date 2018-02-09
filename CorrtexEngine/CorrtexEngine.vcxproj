@@ -182,6 +182,7 @@
     <ClInclude Include="CorrtexRandom.h" />
     <ClInclude Include="CorrtexShader.h" />
     <ClInclude Include="CorrtexTetrahedron.h" />
+    <ClInclude Include="CorrtexWater.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="LinkedList.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="CorrtexRandom.cpp" />
     <ClCompile Include="CorrtexShader.cpp" />
     <ClCompile Include="CorrtexTetrahedron.cpp" />
+    <ClCompile Include="CorrtexWater.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="ModelLoader.cpp" />

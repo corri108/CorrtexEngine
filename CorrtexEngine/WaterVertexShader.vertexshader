@@ -1,0 +1,27 @@
+#version 330 core
+uniform mat4 MVP;
+uniform mat4 modelMatrix;
+uniform vec4 clippingPlane;
+uniform vec2 texRatio = vec2 (1,1);
+uniform float time;
+
+layout(location=0) in vec3 vertexPositions;
+layout(location=2) in vec2 vertexUVs;
+layout(location=3) in vec3 vertexNormals;
+
+out vec4 clipSpace;
+out vec2 texCoords;
+
+void main()
+{
+	//vec4 modelPos = modelMatrix * vec4 (vertexPositions, 1.0 );
+	//gl_ClipDistance[0] = dot(clippingPlane, modelPos);
+	
+	float y = 0;// cos(time) + sin(time / 2);
+	vec4 world = vec4 (vertexPositions.x, y, vertexPositions.z, 1.0);
+	
+	clipSpace = MVP * world;
+	gl_Position = clipSpace;
+	
+	texCoords = vec2 (vertexUVs.x / 2.0 + 0.5 , vertexUVs.y / 2.0 + 0.5 ) * texRatio;
+}

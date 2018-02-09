@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CorrtexMesh.h"
-
+#include "GameEngine.h"
 
 CorrtexMesh::CorrtexMesh()
 {
@@ -29,48 +29,90 @@ void CorrtexMesh::Initialize()
 	}
 	else
 	{
+		//deal with indexing
+		std::vector<vec3> vert_list;
+		std::vector<vec2> uv_list;
+		std::vector<vec3> norm_list;
+		std::vector<vec3> tan_list;
+		std::vector<vec3> bitan_list;
+
+		//ARE WE USING INDEXING??
+		if (this->useIndexing)
+		{
+			int countBeforeIndex = vertices.size();
+
+			if (this->shader->HasAttribute(TANGENT) &&
+				this->shader->HasAttribute(BITANGENT))
+			{
+				GameEngine::vboIndexer->IndexVBO_TBN(vertices, uvs, normals, tangents, bitangents,
+					indicies, vert_list, uv_list, norm_list, tan_list, bitan_list);
+			}
+			else
+			{
+				GameEngine::vboIndexer->IndexVBO(vertices, uvs, normals,
+					indicies, vert_list, uv_list, norm_list);
+			}
+
+			int countAfterIndex = vert_list.size();
+
+			printf("Before index: %d verts....After index: %d verts.\n", countBeforeIndex, countAfterIndex);
+
+			//index buffer
+			glGenBuffers(1, &indexBuffer);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(unsigned short), &indicies[0], GL_STATIC_DRAW);
+		}
+		else
+		{
+			//set the indexed_verts and all other vectors to the original vertices lists
+			vert_list = vertices;
+			uv_list = uvs;
+			norm_list = normals;
+			tan_list = tangents;
+			bitan_list = bitangents;
+		}
+
 		if (this->shader->HasAttribute(VERTEX))
 		{
 			//vertex buffer
 			glGenBuffers(1, &vertexBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, vert_list.size() * sizeof(glm::vec3), &vert_list[0], GL_STATIC_DRAW);
 		}
 		if (this->shader->HasAttribute(UV))
 		{
 			//uv buffer
 			glGenBuffers(1, &uvBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-			glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, uv_list.size() * sizeof(glm::vec2), &uv_list[0], GL_STATIC_DRAW);
 		}
 		if (this->shader->HasAttribute(NORMAL))
 		{
 			//normal buffer
 			glGenBuffers(1, &normalBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-			glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, norm_list.size() * sizeof(glm::vec3), &norm_list[0], GL_STATIC_DRAW);
 		}
 		if (this->shader->HasAttribute(TANGENT))
 		{
 			glGenBuffers(1, &tangentBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, tangentBuffer);
-			glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(glm::vec3), &tangents[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, tan_list.size() * sizeof(glm::vec3), &tan_list[0], GL_STATIC_DRAW);
 		}
 		if (this->shader->HasAttribute(BITANGENT))
 		{
 			glGenBuffers(1, &bitangentBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
-			glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), &bitangents[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, bitan_list.size() * sizeof(glm::vec3), &bitan_list[0], GL_STATIC_DRAW);
 		}
 	}
 
-	if (indicies.size() > 0)
-	{
-		//lets try something new - index buffer!
-		glGenBuffers(1, &indexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(unsigned int), &indicies[0], GL_STATIC_DRAW);
-	}
+	GenSpecialBuffers();
+}
+
+void CorrtexMesh::GenSpecialBuffers()
+{
+
 }
 
 void CorrtexMesh::AddTexture(char * textureLocation)
@@ -140,7 +182,15 @@ void CorrtexMesh::SetShaderValues(mat4 mvp, mat4 view)
 			case Float1:
 				if (attribName == "time")
 				{
-					//su->SetValue(GameEngine::time);
+					su->SetValue(GameEngine::time);
+				}
+				else if (attribName == "waveStrength")
+				{
+					su->SetValue(GameEngine::waterObject->waveStrength);
+				}
+				else if (attribName == "waveTime")
+				{
+					su->SetValue(GameEngine::waterObject->waveTime);
 				}
 				else if (attribName == "shininess")
 				{
@@ -238,6 +288,10 @@ void CorrtexMesh::SetShaderValues(mat4 mvp, mat4 view)
 				{
 					su->SetValue(GameEngine::light1->lightPosition);
 				}
+				else if (attribName == "clippingPlane")
+				{
+					su->SetValue(GameEngine::clippingPlane);
+				}
 				break;
 			}
 		}	
@@ -271,6 +325,7 @@ void CorrtexMesh::SetShaderAttributes()
 		{
 			for (const auto &myPair : this->material->textures)
 			{
+				const char *name = this->name;
 				const char *key = myPair.first;
 				int textureNumber = this->material->GetTextureNumber(key);
 				GLuint matTexture = this->material->GetTexture(key);
@@ -382,7 +437,26 @@ void CorrtexMesh::Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform)
 		this->shader->UseShader();
 		this->SetShaderValues(mvp, view);
 		this->SetShaderAttributes();
-		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+
+		//if we are using indexing, we will draw differently
+		if (this->useIndexing)
+		{
+			// Index buffer drawing
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexBuffer);
+
+			// Draw the triangles !
+			glDrawElements(
+				GL_TRIANGLES,      // mode
+				indicies.size(),    // count
+				GL_UNSIGNED_SHORT,   // type
+				(void*)0           // element array buffer offset
+			);
+		}
+		else//draw regular triangle arrays
+		{
+			glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+		}
+
 		//this->GetErrorIfExists();
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);

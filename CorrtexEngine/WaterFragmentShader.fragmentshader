@@ -1,0 +1,37 @@
+#version 330 core
+
+in vec4 clipSpace;
+in vec2 texCoords;
+out vec4 fragColor;
+
+uniform sampler2D tex;//reflection
+uniform sampler2D tex2;//refraction
+uniform sampler2D dudv;//dudv
+
+uniform float waveTime;
+uniform float waveStrength = 5;
+
+void main()
+{
+	vec2 ndc = (clipSpace.xy / clipSpace.w) / 2.0 + 0.5 ;
+	vec2 reflectTexCoord = vec2 (ndc.x, -ndc.y);
+	vec2 refractTexCoord = ndc.xy;
+	
+	vec2 distortion1 = (texture(dudv, vec2 (texCoords.x + waveTime, texCoords.y)).rg * 2.0 - 1.0 ) * waveStrength;
+	vec2 distortion2 = (texture(dudv, vec2 (-texCoords.x + waveTime, texCoords.y + waveTime)).rg * 2.0 - 1.0 ) * waveStrength;
+	
+	vec2 distortion  = distortion1 + distortion2;
+	
+	reflectTexCoord += distortion;
+	reflectTexCoord.x = clamp(reflectTexCoord.x, 0.0001 , 0.9999 );
+	reflectTexCoord.y = clamp(reflectTexCoord.y, -0.9999 , -0.0001 );
+	
+	refractTexCoord += distortion;
+	refractTexCoord = clamp(refractTexCoord, 0.0001 , 0.9999 );
+	
+	vec4 reflectionTex = texture(tex, reflectTexCoord);
+	vec4 refractionTex = texture(tex2, refractTexCoord);
+	
+	fragColor = mix(reflectionTex, refractionTex, 0.5 );
+	fragColor = mix(fragColor, vec4 (0.0, 0.2, 0.5, 1.0), 0.25 );
+}

@@ -35,6 +35,7 @@ mat4 CorrtexCamera::GetViewMatrix()
 void CorrtexCamera::UpdateProjectionMatrix()
 {
 	this->projection = glm::perspective(radians(fieldOfView), aspectRatio, nearPlane, farPlane);
+	bool x = false;
 }
 
 void CorrtexCamera::UpdateViewMatrix()

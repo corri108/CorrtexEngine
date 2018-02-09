@@ -1,5 +1,7 @@
 #version 330 core
 uniform mat4 MVP;
+uniform mat4 modelMatrix;
+uniform vec4 clippingPlane;
 
 layout(location=0) in vec3 vertexPositions;
 layout(location=2) in vec2 vertexUVs;
@@ -15,5 +17,7 @@ void main()
 	vertUVs = vertexUVs;
 	vertNormals = vertexNormals;
 	
-	gl_Position = MVP * vec4( vertexPositions, 1);
+	vec4 pos4 = vec4 ( vertexPositions, 1);
+	gl_Position = MVP * pos4;
+	//gl_ClipDistance[0] = dot(modelMatrix * pos4, clippingPlane);
 }

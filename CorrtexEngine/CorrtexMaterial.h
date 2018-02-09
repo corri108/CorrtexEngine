@@ -18,6 +18,7 @@ public:
 	~CorrtexMaterial();
 	void AddTexture(const char * texName, GLuint texValue);
 	void AddTexture(const char *texName, GLuint texValue, int texNum);
+	void UpdateTexture(const char *texName, GLuint texValue);
 	GLuint GetTexture(const char * texName);
 	int GetTextureNumber(const char * texName);
 	float ambientIntensity = 0.075f;
