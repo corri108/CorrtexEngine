@@ -7,13 +7,53 @@ ModelLoader::ModelLoader()
 {
 
 }
-
-
+		
 ModelLoader::~ModelLoader()
 {
 
 }
 
+//conversion methods from assimp to glm
+vec2 toGLM(aiVector2D v)
+{
+	return vec2(v.x, v.y);
+}
+
+vec2 toGLM_tex(aiVector3D v)
+{
+	return vec2(v.x, v.y);
+}
+
+vec3 toGLM(aiVector3D v)
+{
+	return vec3(v.x, v.y, v.z);
+}
+
+mat4 toGLM(aiMatrix4x4 m)
+{
+	mat4 ret = mat4(1.0f);
+	ret[0][0] = m.a1;
+	ret[0][1] = m.a2;
+	ret[0][2] = m.a3;
+	ret[0][3] = m.a4;
+
+	ret[1][0] = m.b1;
+	ret[1][1] = m.b2;
+	ret[1][2] = m.b3;
+	ret[1][3] = m.b4;
+
+	ret[2][0] = m.c1;
+	ret[2][1] = m.c2;
+	ret[2][2] = m.c3;
+	ret[2][3] = m.c4;
+
+	ret[3][0] = m.d1;
+	ret[3][1] = m.d2;
+	ret[3][2] = m.d3;
+	ret[3][3] = m.d4;
+
+	return ret;
+}
 
 bool ModelLoader::LoadOBJ(const char *filePath,
 	vector<vec3> &out_vertices,
@@ -129,21 +169,102 @@ bool ModelLoader::LoadOBJ(const char *filePath,
 	return true;
 }
 
+bool ModelLoader::LoadSkinned(const char *filePath,
+	vector<vec3> &out_vertices,
+	vector<vec2> &out_uvs,
+	vector<vec3> &out_normals,
+	vector<ivec3> &jointIDs,
+	vector<vec3> &weights,
+	int *boneCount, int *rootBoneIndex, char **rootBoneName, mat4 *rootBoneBind)
+{
+	const aiScene * animatedModel = aiImportFile(filePath, aiProcessPreset_TargetRealtime_MaxQuality);
+	const char *error = aiGetErrorString();
 
-//else if (strcmp(lineHeader, "f") == 0) {
-//	std::string vertex1, vertex2, vertex3;
-//	unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-//	int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-//	if (matches != 9) {
-//		printf("File can't be read by our simple parser : ( Try exporting with other options\n");
-//		return false;
-//	}
-//	vertexIndices.push_back(vertexIndex[0]);
-//	vertexIndices.push_back(vertexIndex[1]);
-//	vertexIndices.push_back(vertexIndex[2]);
-//	uvIndices.push_back(uvIndex[0]);
-//	uvIndices.push_back(uvIndex[1]);
-//	uvIndices.push_back(uvIndex[2]);
-//	normalIndices.push_back(normalIndex[0]);
-//	normalIndices.push_back(normalIndex[1]);
-//	normalIndices.push_back(normalIndex[2]);
+	if (*error != '\0')
+	{
+		printf("error importing: %s", aiGetErrorString());
+		return false;
+	}
+
+	vector<aiVertexWeight*> vertWeights;
+	vector<aiBone*> bones;
+	vector<int> bonesPerMesh;
+
+	for (int i = 0; i < animatedModel->mNumMeshes; ++i)
+	{
+		int vertexCount = animatedModel->mMeshes[i]->mNumVertices;
+
+		for (int v = 0; v < vertexCount; ++v)
+		{
+			aiVector3D vert = animatedModel->mMeshes[i]->mVertices[v];
+			out_vertices.push_back(toGLM(vert));
+
+			aiVector3D tex = animatedModel->mMeshes[i]->mTextureCoords[0][v];
+			out_uvs.push_back(toGLM_tex(tex));
+
+			aiVector3D norm = animatedModel->mMeshes[i]->mNormals[v];
+			out_normals.push_back(toGLM(norm));
+
+			//set jointIDs and weights for this index to 0
+			jointIDs.push_back(ivec3(-1, -1, -1));
+			weights.push_back(vec3(0, 0, 0));
+		}
+
+		int bonesThisMesh = animatedModel->mMeshes[i]->mNumBones;
+		bonesPerMesh.push_back(bonesThisMesh);
+		for (int b = 0; b < bonesThisMesh; ++b)
+		{
+			bones.push_back(animatedModel->mMeshes[i]->mBones[b]);
+		}
+	}
+
+	vector<mat4> bindTransforms;
+
+	//now for bones
+	for (int b = 0; b < bones.size(); ++b)
+	{
+		const char* boneName = bones[b]->mName.C_Str();
+		bindTransforms.push_back(toGLM(bones[b]->mOffsetMatrix));
+		unsigned int numWeights = bones[b]->mNumWeights;
+
+		for (int w = 0; w < numWeights; ++w)
+		{
+			unsigned int vid = bones[b]->mWeights[w].mVertexId;
+			float weight = bones[b]->mWeights[w].mWeight;
+			ivec3 joint = jointIDs[vid];
+			
+			if (joint.x == -1)//first spot open?
+			{
+				jointIDs[vid].x = b;
+				weights[vid].x = weight;
+			}
+			else if (joint.y == -1)//second spot open?
+			{
+				jointIDs[vid].y = b;
+				weights[vid].y = weight;
+			}
+			else if (joint.z == -1)//last chance
+			{
+				jointIDs[vid].z = b;
+				weights[vid].z = weight;
+			}
+		}
+
+		bool k = false;
+	}
+
+	*boneCount = bones.size();
+	*rootBoneIndex = 0;
+	*rootBoneName = (char *)bones[0]->mName.C_Str();
+	*rootBoneBind = bindTransforms[0];
+
+	int animCount = animatedModel->mNumAnimations;
+
+	for (int i = 0; i < animCount; ++i)
+	{
+		animatedModel->mAnimations[i]->
+	}
+
+	printf("animation count: %d", animCount);
+	return true;
+}

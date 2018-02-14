@@ -318,7 +318,7 @@ void GameEngine::Init()
 	aspectRatio = (float)width / (float)height;
 
 
-	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", true);
+	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
 	objectList = new LinkedList<CorrtexObject*>();
 	lights = new LinkedList<CorrtexLight*>();
@@ -464,6 +464,8 @@ void GameEngine::DoRefraction(float waterHeight)
 	DrawScene();
 }
 
+bool setWater = false;
+
 void GameEngine::FBOObjectsDraw()
 {
 	//if we have water
@@ -482,16 +484,21 @@ void GameEngine::FBOObjectsDraw()
 		clippingPlane.w = 100000000000;
 	}
 
-	//update textures onto object
-	int sz = objectList->Count();
-	for (int i = 0; i < sz; ++i)
+	if (!setWater)
 	{
-		if (objectList->Get(i)->name == "WaterPlane")
+		//update textures onto object
+		int sz = objectList->Count();
+		for (int i = 0; i < sz; ++i)
 		{
-			objectList->Get(i)->material->UpdateTexture("tex", waterObject->reflectionTexture);
-			objectList->Get(i)->material->UpdateTexture("tex2", waterObject->refractionTexture);
-			objectList->Get(i)->material->UpdateTexture("depth", waterObject->refractionDepthTexture);
+			if (objectList->Get(i)->name == "WaterPlane")
+			{
+				objectList->Get(i)->material->UpdateTexture("tex", waterObject->reflectionTexture);
+				objectList->Get(i)->material->UpdateTexture("tex2", waterObject->refractionTexture);
+				objectList->Get(i)->material->UpdateTexture("depth", waterObject->refractionDepthTexture);
+			}
 		}
+
+		setWater = true;
 	}
 }
 

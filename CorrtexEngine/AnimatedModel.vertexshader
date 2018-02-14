@@ -1,0 +1,53 @@
+#version 330 core
+uniform mat4 MVP;
+uniform mat4 modelMatrix;
+uniform mat4 viewProjectionMatrix;
+uniform vec4 clippingPlane;
+
+//layouts
+layout(location=0) in vec3 vertexPositions;
+layout(location=2) in vec2 vertexUVs;
+layout(location=3) in vec3 vertexNormals;
+layout(location=6) in ivec3 jointIDs;
+layout(location=7) in vec3 weights;
+
+//outs
+out vec3 weightedPosition;
+out vec2 vertUVs;
+out vec3 vertNormals;
+
+//joint stuff
+#define MAX_JOINTS 50
+#define MAX_WEIGHTS 3
+uniform int numJoints = 1;
+uniform struct Joint
+{
+	mat4 boneTransform;
+} joints[MAX_JOINTS];
+
+void main()
+{
+	vec4 totalLocal = vec4(0);
+	vec4 totalNormal = vec4(0);
+	
+	for ( int i = 0; i < MAX_WEIGHTS; ++i)
+	{
+		//get joint transform
+		mat4 jointT = joints[jointIDs[i]].boneTransform;
+		
+		//calc this weights position
+		vec4 pose = jointT * vec4 (vertexPositions, 1.0 );
+		totalLocal += pose * weights[i];//weights is a vec3 - its just easier to get value this way
+		//calc this weights normal
+		vec4 normal = jointT * vec4 (vertexNormals, 0.0 );
+		totalNormal += normal * weights[i];
+	}
+	
+	//pass this with just the modelMatrix for lighting calculations
+	weightedPosition = (modelMatrix * totalLocal).xyz;
+	
+	//get position as usual
+	gl_Position = MVP * totalLocal;
+	vertUVs = vertexUVs;
+	vertNormals = totalNormal.xyz;
+}

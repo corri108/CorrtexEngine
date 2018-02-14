@@ -4,6 +4,7 @@
 #include "BMPLoader.h"
 #include "CorrtexLight.h"
 #include "CorrtexWater.h"
+#include "AnimatedModel.h"
 #include "CorrtexFPSCamera.h"
 #include "CorrtexRandom.h"
 #include "ModelLoader.h"

@@ -17,7 +17,7 @@ public:
 	virtual void AddTexture(char * textureLocation);
 	void AddTexture(GLuint textureLoc);
 	void SetShaderValues(mat4 mvp, mat4 view);
-	void SetShaderAttributes();
+	virtual void SetShaderAttributes();
 	virtual void ShaderInit();
 	virtual void GenSpecialBuffers();
 

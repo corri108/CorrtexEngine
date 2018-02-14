@@ -14,7 +14,9 @@ enum ShaderLayoutLocation
 	UV = 2,
 	NORMAL = 3,
 	TANGENT = 4,
-	BITANGENT = 5
+	BITANGENT = 5,
+	JOINTS = 6,
+	WEIGHTS = 7
 };
 
 class CorrtexShader

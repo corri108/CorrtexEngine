@@ -479,6 +479,8 @@ void CorrtexMesh::Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform)
 		glDisableVertexAttribArray(3);
 		glDisableVertexAttribArray(4);
 		glDisableVertexAttribArray(5);
+		glDisableVertexAttribArray(6);
+		glDisableVertexAttribArray(7);
 		//glDisable(GL_TEXTURE_2D);
 
 		//use alpha blending?

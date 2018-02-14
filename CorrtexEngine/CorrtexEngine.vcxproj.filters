@@ -49,6 +49,9 @@
     <Filter Include="Source Files\Engine\Objects\Mesh">
       <UniqueIdentifier>{c5bc3a06-ef0a-4770-996e-eae4f203a948}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Animation">
+      <UniqueIdentifier>{1234d087-87f8-4bea-8559-feb960adc021}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -129,6 +132,24 @@
     <ClInclude Include="CorrtexWater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Joint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyframe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JointTransform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CorrtexFPSCamera.cpp">
@@ -191,17 +212,35 @@
     <ClCompile Include="CorrtexLight.cpp">
       <Filter>Source Files\Engine\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="CorrtexMaterial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CorrtexMesh.cpp">
       <Filter>Source Files\Engine\Objects\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Joint.cpp">
+      <Filter>Source Files\Engine\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimatedModel.cpp">
+      <Filter>Source Files\Engine\Animation</Filter>
+    </ClCompile>
     <ClCompile Include="VBOIndexer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Engine\Utility</Filter>
     </ClCompile>
     <ClCompile Include="CorrtexWater.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="CorrtexMaterial.cpp">
+      <Filter>Source Files\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files\Engine\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyframe.cpp">
+      <Filter>Source Files\Engine\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animator.cpp">
+      <Filter>Source Files\Engine\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="JointTransform.cpp">
+      <Filter>Source Files\Engine\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

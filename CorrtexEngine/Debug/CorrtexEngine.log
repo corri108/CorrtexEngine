@@ -1,9 +1,4 @@
-﻿  GameEngine.cpp
+﻿  Game.cpp
   CORRTEX MESH INCLUDED.
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(44): warning C4018: '<': signed/unsigned mismatch
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(95): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(321): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(476): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(477): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\gameengine.cpp(482): warning C4305: '=': truncation from '__int64' to 'float'
+c:\users\socce\documents\c++ projects\corrtexengine\corrtexengine\game.cpp(231): warning C4305: '=': truncation from 'double' to 'float'
   CorrtexEngine.vcxproj -> C:\Users\socce\Documents\C++ Projects\CorrtexEngine\Debug\CorrtexEngine.exe
