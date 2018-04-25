@@ -5,10 +5,11 @@
 
 using namespace std;
 
+//mesh class - this class is essentially an object that also has an array of verticies with specific attributes,
+//creating a visual representation of a model.
 class CorrtexMesh : public CorrtexObject
 {
 public:
-	#pragma message("CORRTEX MESH INCLUDED.")
 	CorrtexMesh();
 	CorrtexMesh(vec3 position, char *fileLoc);
 	~CorrtexMesh();
@@ -29,6 +30,7 @@ public:
 	vector<glm::vec3> bitangents;
 	vector<unsigned short> indicies;
 
+	//buffers that are needed
 	GLuint vertexBuffer;
 	GLuint uvBuffer;
 	GLuint normalBuffer;

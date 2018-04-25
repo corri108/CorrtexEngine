@@ -2,6 +2,7 @@
 #include "VBOIndexer.h"
 #include <string.h> // for memcmp
 
+//indexer for index buffer. see header file for more details.
 VBOIndexer::VBOIndexer()
 {
 }

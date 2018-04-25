@@ -10,6 +10,8 @@
 #include "ModelLoader.h"
 #include "VBOIndexer.h"
 
+//the actual game engine class. this is the heart of the program, and is in control of the main game loop,
+//along with many helper functions.
 class GameEngine
 {
 public:
@@ -17,7 +19,7 @@ public:
 	GameEngine();
 	~GameEngine();
 
-	//user functions
+	//helpful user functions - make a lot of them static, so that we dont have to always keep a reference to the game to call some of the functions.
 	static void LoadModel(const char *filePath, std::vector<vec3> &out_verts, std::vector<vec2> &out_uvs, std::vector<vec3> &out_norms);
 	static void ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vector<vec3> in_norms,
 		vector<vec3> &out_tangents, vector<vec3> &out_bitangents);
@@ -43,7 +45,7 @@ public:
 	static int lightCount;
 	static bool showFPS;
 	static bool wireframeOn;
-	//important members
+	//important members - including lists, input manager, file loaders, and other neccesities
 	static LinkedList<CorrtexObject*> *objectList;
 	static LinkedList<CorrtexLight*> *lights;
 	static CorrtexFPSCamera *camera;
@@ -58,7 +60,7 @@ public:
 	ShaderUniform *mvpUni;
 	GLFWwindow *window;
 
-	//public internal
+	//run + other important methods
 	void Run();
 	void SetUserFunc(CorrtexFunc userInit, CorrtexFuncf userUpdate);
 	static GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
@@ -79,7 +81,6 @@ protected:
 	void FPSCounter();
 	double fpsLastTime = 0.0;
 	int fpsFrameNum = 0;
-	//very internal
 	GLFWwindow* WindowInit(int w, int h, char windowTitle[], bool fullscreen);
 };
 

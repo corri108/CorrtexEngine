@@ -2,10 +2,11 @@
 #include "CorrtexMaterial.h"
 
 
+//empty ctor
 CorrtexMaterial::CorrtexMaterial()
 {
 }
-
+//ctor
 CorrtexMaterial::CorrtexMaterial(float ambient, float shininess, vec3 spec)
 {
 	this->ambientIntensity = ambient;
@@ -14,11 +15,12 @@ CorrtexMaterial::CorrtexMaterial(float ambient, float shininess, vec3 spec)
 	this->textures = std::map<const char *, TextureHolder>();
 	useAlphaBlending = false;
 }
-
+//dtor
 CorrtexMaterial::~CorrtexMaterial()
 {
 }
 
+//adds a texture to this material
 void CorrtexMaterial::AddTexture(const char *texName, GLuint texValue)
 {
 	if (this->textures.find(texName) == this->textures.end())
@@ -36,7 +38,7 @@ void CorrtexMaterial::AddTexture(const char *texName, GLuint texValue)
 		printf("Error! Texture with this value has already been added to the map.\n");
 	}
 }
-
+//adds a texture to this material, giving it an integer as reference if you plan on putting more than one texture in for this material.
 void CorrtexMaterial::AddTexture(const char *texName, GLuint texValue, int texNum)
 {
 	if (this->textures.find(texName) == this->textures.end())
@@ -52,7 +54,7 @@ void CorrtexMaterial::AddTexture(const char *texName, GLuint texValue, int texNu
 		printf("Error! Texture with this value has already been added to the map.\n");
 	}
 }
-
+//updates the value of a given texture
 void CorrtexMaterial::UpdateTexture(const char *texName, GLuint texValue)
 {
 	if (this->textures.find(texName) == this->textures.end())
@@ -67,7 +69,7 @@ void CorrtexMaterial::UpdateTexture(const char *texName, GLuint texValue)
 		this->textures[texName] = prev;
 	}
 }
-
+//gets a texture in the form of its GLuint location
 GLuint CorrtexMaterial::GetTexture(const char * texName)
 {
 	//only return texture if it exists in the map
@@ -78,7 +80,7 @@ GLuint CorrtexMaterial::GetTexture(const char * texName)
 
 	return false;
 }
-
+//gets a texture number
 int CorrtexMaterial::GetTextureNumber(const char * texName)
 {
 	//only return texture if it exists in the map

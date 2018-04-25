@@ -8,6 +8,8 @@
 
 class Animator;
 
+//AnimatedModel class - class that is capable of everything that a CorrtexMesh is capable of, but can 
+//also store skinning data for animation using bones. Not currently working 100% yet
 class AnimatedModel : public CorrtexMesh
 {
 public:
@@ -33,4 +35,4 @@ public:
 	Animator *animator = NULL;
 };
 
-#endif //ANIMATEDMODEL_H
+#endif

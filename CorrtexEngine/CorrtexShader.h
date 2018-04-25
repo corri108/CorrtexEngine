@@ -7,6 +7,7 @@
 
 using namespace std;
 
+//enum to categorize different layouts of vertex attributes
 enum ShaderLayoutLocation
 {
 	VERTEX = 0,
@@ -19,6 +20,7 @@ enum ShaderLayoutLocation
 	WEIGHTS = 7
 };
 
+//shader class
 class CorrtexShader
 {
 public:

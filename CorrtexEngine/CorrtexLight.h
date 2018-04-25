@@ -3,6 +3,8 @@
 #include <glm\ext.hpp>
 using namespace glm;
 
+//light class. this is used to place in a level in order to give it light. depending on the shader and material
+//used on each object, the light will affect the level in different ways.
 class CorrtexLight
 {
 public:

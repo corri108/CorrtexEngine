@@ -2,6 +2,7 @@
 #include "CorrtexPrimitive.h"
 #include "GameEngine.h"
 
+//base primitive class. see header file for more details.
 CorrtexPrimitive::CorrtexPrimitive() : 
 	CorrtexPrimitive(vec3(0), 3)
 {

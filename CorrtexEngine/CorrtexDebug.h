@@ -1,5 +1,5 @@
 #pragma once
-
+//very small and simple debug class
 class CorrtexDebug
 {
 public:

@@ -2,6 +2,9 @@
 #include "ShaderUniform.h"
 #include "GameEngine.h"
 
+//wrapper class to help access various uniform locations within shaders
+
+//constructors
 ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char * glslName)
 {
 	this->shaderProgram = shaderProgram;
@@ -10,7 +13,6 @@ ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char 
 
 	this->handle = GenerateLocationHandle();
 }
-
 ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char * arrayStructName, char* attribute)
 {
 	this->shaderProgram = shaderProgram;
@@ -21,17 +23,18 @@ ShaderUniform::ShaderUniform(ShaderUniformType type, GLuint shaderProgram, char 
 	this->arrayStructAttribute = attribute;
 	this->handles = GenerateLocationHandles();
 }
-
+//desctructor
 ShaderUniform::~ShaderUniform()
 {
 
 }
 
+//generates a location handle
 int ShaderUniform::GenerateLocationHandle()
 {
 	return glGetUniformLocation(shaderProgram, glslName);
 }
-
+//generates multiple location handles (used if the shader has an array in it)
 std::vector<GLuint> ShaderUniform::GenerateLocationHandles()
 {
 	std::vector<GLuint> genHandles;
@@ -53,13 +56,13 @@ std::vector<GLuint> ShaderUniform::GenerateLocationHandles()
 
 	return genHandles;
 }
-
+//gets the location handle
 int ShaderUniform::GetHandle()
 {
 	return handle;
 }
 
-//float
+//methods for setting float value(s)
 void ShaderUniform::SetValue(float f1)
 {
 	glUniform1f(this->handle, f1);
@@ -88,7 +91,8 @@ void ShaderUniform::SetValue(vec4 f)
 {
 	glUniform4f(this->handle, f.x, f.y, f.z, f.w);
 }
-//int
+
+//methods for setting int value(s)
 void ShaderUniform::SetValuei(int i1, int i2)
 {
 	glUniform2i(handle, i1, i2);
@@ -101,7 +105,8 @@ void ShaderUniform::SetValuei(int i1, int i2, int i3, int i4)
 {
 	glUniform4i(handle, i1, i2, i3, i4);
 }
-//other
+
+//other (textures, matrix, etc)
 void ShaderUniform::SetValuei(int intVal)
 {
 	glUniform1i(handle, intVal);
@@ -124,6 +129,7 @@ void ShaderUniform::SetValue(mat4 matrix)
 	glUniformMatrix4fv(handle, 1, GL_FALSE, &matrix[0][0]);
 }
 
+//arrays
 void ShaderUniform::SetArrayValues()
 {
 	int count = this->handles.size();

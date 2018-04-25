@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "InputManager.h"
 
+//handles input. see header file for more details
 InputManager::InputManager() :
 	InputManager(NULL)
 {

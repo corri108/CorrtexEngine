@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CorrtexTetrahedron.h"
 
-
+//a basic tetrahedron primitive
 CorrtexTetrahedron::CorrtexTetrahedron() :
 	CorrtexTetrahedron::CorrtexTetrahedron(vec3(0), 1.0f)
 {
@@ -13,9 +13,9 @@ CorrtexTetrahedron::CorrtexTetrahedron(vec3 pos, float size)
 	//transform / matrix stuff
 	this->position = pos;
 	this->startingPosition = pos;
-	SetScale(size);
+	SetScaleUniform(size);
 	this->startingScale = vec3(size);
-	//vertex / drawing stuff
+	//vertex / drawing stuff for creating a tetrehedron
 	this->vertexCount = 12;
 	this->vertexBufferData = new GLfloat[this->vertexCount * 3]
 	{
@@ -57,7 +57,6 @@ CorrtexTetrahedron::CorrtexTetrahedron(vec3 pos, float size)
 	this->UVBufferData = NULL;
 	this->UVCoordCount = 0;
 }
-
 
 CorrtexTetrahedron::~CorrtexTetrahedron()
 {

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Keyframe.h"
 
+//simple class to represent a keyframe.
 
 Keyframe::Keyframe()
 {
@@ -13,7 +14,6 @@ Keyframe::Keyframe(float timeStamp, int numJoints, std::map<char *, JointTransfo
 	this->numJoints = numJoints;
 	this->pose = pose;
 }
-
 
 Keyframe::~Keyframe()
 {

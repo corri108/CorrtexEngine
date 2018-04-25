@@ -2,6 +2,9 @@
 #include "CorrtexCamera.h"
 #include "CorrtexDebug.h"
 
+//extension of the regular camera class. can move with WASD and rotate with mouse, just
+//like in a FPS game.
+
 class CorrtexFPSCamera : public CorrtexCamera
 {
 public:

@@ -1,5 +1,6 @@
 #pragma once
 
+//custom LinkedList class. made for fun
 template<typename T>
 struct Node
 {

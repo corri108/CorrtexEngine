@@ -2,12 +2,12 @@
 #include "CorrtexObject.h"
 #include "GameEngine.h"
 
+//ctor / dtor
 CorrtexObject::CorrtexObject() :
 	CorrtexObject(vec3(0), "CorrtexObject Instance")
 {
 	
 }
-
 CorrtexObject::CorrtexObject(vec3 pos, char* name)
 {
 	this->position = pos;
@@ -20,39 +20,32 @@ CorrtexObject::CorrtexObject(vec3 pos, char* name)
 	this->name = name;
 	GameEngine::objectList->Add(this);
 }
-
 CorrtexObject::~CorrtexObject()
 {
 
 }
 
+//set shaders & materials
 void CorrtexObject::SetShader(CorrtexShader *shader)
 {
 	this->shader = shader;
 	ShaderInit();
 }
-
 void CorrtexObject::SetShader(CorrtexShader &shader)
 {
 	this->shader = &shader;
 	ShaderInit();
 }
-
-void CorrtexObject::ShaderInit()
-{
-
-}
-
 void CorrtexObject::SetMaterial(CorrtexMaterial *mat)
 {
 	this->material = mat;
 }
-
 void CorrtexObject::SetMaterial(CorrtexMaterial &mat)
 {
 	this->material = &mat;
 }
 
+//gets and prints a GLError if it exists
 void CorrtexObject::GetErrorIfExists()
 {
 	GLenum err = glGetError();
@@ -64,11 +57,13 @@ void CorrtexObject::GetErrorIfExists()
 	}
 }
 
+//sets the behaviour function for this object
 void CorrtexObject::SetBehaviour(CorrtexBehaviour behaviour)
 {
 	Behaviour = behaviour;
 }
 
+//calculates the model matrix for this object
 void CorrtexObject::CalculateModelMatrix()
 {
 	this->yawMatrix = glm::rotate(yawMatrix, this->yaw, vec3(0.0f, 1.0f, 0.0f));
@@ -79,24 +74,16 @@ void CorrtexObject::CalculateModelMatrix()
 
 	model = glm::translate(this->position) *
 		this->rotation *
-		glm::scale(this->scale);// *
-		//glm::rotate(rollMatrix, this->roll, vec3(0.0f, 0.0f, 1.0f)) *
-		//glm::rotate(pitchMatrix, this->pitch, vec3(1.0f, 0.0f, 0.0f)) *
-		//glm::rotate(yawMatrix, this->yaw, vec3(0.0f, 1.0f, 0.0f));
+		glm::scale(this->scale);
 }
 
+//draws this object
 void CorrtexObject::Draw(mat4 view, mat4 proj, ShaderUniform &mvpUniform)
 {
 	CalculateModelMatrix();
-
-	//mvpUniform.SetValue(model);
 }
 
-void CorrtexObject::Initialize()
-{
-
-}
-
+//updates this object
 void CorrtexObject::Update(float time)
 {
 	if (Behaviour != NULL)
@@ -105,13 +92,15 @@ void CorrtexObject::Update(float time)
 	}
 }
 
+//debug method
 void CorrtexObject::Debug()
 {
 	printf("Name: %s, Pos: (%f, %f, %f) Rot: (%f) Scale: (%f, %f, %f)\n",
 		name, position.x, position.y, position.z, rotation, scale.x, scale.y, scale.z);
 }
 
-void CorrtexObject::SetScale(float s)
+//sets the uniform scale of this object
+void CorrtexObject::SetScaleUniform(float s)
 {
 	this->scale = vec3(s);
 }

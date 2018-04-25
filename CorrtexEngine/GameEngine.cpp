@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "GameEngine.h"
 
-//static shite
+//static stuff so you can access without having reference to game
 LinkedList<CorrtexObject*> *GameEngine::objectList = NULL;
 LinkedList<CorrtexLight*> *GameEngine::lights = NULL;
 CorrtexFPSCamera *GameEngine::camera = NULL;
@@ -22,21 +22,32 @@ float GameEngine::timeStep = 0.016666666f;//1/60th of sec
 float GameEngine::timeMod = 0.0f;
 vec4 GameEngine::clippingPlane = vec4(0, -1, 0, 10000000000);
 
+//////////////////////////
+//CONSTRUCTOR / DESTRUCTOR
+//////////////////////////
+
+//constructor - empty
 GameEngine::GameEngine()
 {
 }
-
-
+//desctuctor - empty
 GameEngine::~GameEngine()
 {
 }
 
-//helper functions! (mostly static)
+//////////////////////////
+//HELPER FUNCTIONS - MOSTLY STATIC
+//////////////////////////
+
+//loads a model given a filepath
+//vertices, uvs, and normals are modified by reference
 void GameEngine::LoadModel(const char *filePath, std::vector<vec3> &out_verts, std::vector<vec2> &out_uvs, std::vector<vec3> &out_norms)
 {
 	modelLoader->LoadOBJ(filePath, out_verts, out_uvs, out_norms);
 }
 
+//computes tangents of a given model's vertices, uvs, and normals
+//tangents and bitangents are modified by reference
 void GameEngine::ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vector<vec3> in_norms,
 	vector<vec3> &out_tangents, vector<vec3> &out_bitangents)
 {
@@ -72,16 +83,19 @@ void GameEngine::ComputeTangents(vector<vec3> in_verts, vector<vec2> in_uvs, vec
 	}
 }
 
+//gets the window's width
 int GameEngine::GetWindowWidth()
 {
 	return (int)width;
 }
 
+//gets the window's height
 int GameEngine::GetWindowHeight()
 {
 	return (int)height;
 }
 
+//binds a given frame buffer to be the active fram buffer
 void GameEngine::BindFrameBuffer(GLuint frameBuffer, int w, int h)
 {
 	glBindTexture(GL_TEXTURE_2D, 0);//make sure no texture is bound
@@ -89,12 +103,14 @@ void GameEngine::BindFrameBuffer(GLuint frameBuffer, int w, int h)
 	glViewport(0, 0, w, h);
 }
 
+//unbinds the current frame buffer.
 void GameEngine::UnbindCurrentFrameBuffer()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, width, height);
 }
 
+//generates a new color texture, returning the location of that texture in memory as a standard GLuint
 GLuint GameEngine::GenColorTexture(int w, int h)
 {
 	// The texture we're going to render to
@@ -117,6 +133,7 @@ GLuint GameEngine::GenColorTexture(int w, int h)
 	return renderedTexture;
 }
 
+//generates a new depth texture, returning the location of that texture in memory as a standard GLuint
 GLuint GameEngine::GenDepthTexture(int w, int h)
 {
 	// The texture we're going to render to
@@ -139,6 +156,7 @@ GLuint GameEngine::GenDepthTexture(int w, int h)
 	return renderedTexture;
 }
 
+//generates a new depth buffer, returning the location of that buffer in memory as a standard GLuint
 GLuint GameEngine::GenDepthBuffer(int w, int h)
 {
 	GLuint depthBuffer;
@@ -150,6 +168,7 @@ GLuint GameEngine::GenDepthBuffer(int w, int h)
 	return depthBuffer;
 }
 
+//generates a new frame buffer, returning the location of that buffer in memory as a standard GLuint
 GLuint GameEngine::GenFrameBuffer()
 {
 	GLuint frameBuffer;
@@ -160,7 +179,11 @@ GLuint GameEngine::GenFrameBuffer()
 	return frameBuffer;
 }
 
-//very internal functions
+//////////////////////////
+//INTERNAL FUNCTIONS
+//////////////////////////
+
+//creates a window and returns the window pointer
 GLFWwindow* GameEngine::WindowInit(int w, int h, char windowTitle[], bool fullscreen)
 {
 	GLenum glfwErr = glfwInit();
@@ -195,6 +218,7 @@ GLFWwindow* GameEngine::WindowInit(int w, int h, char windowTitle[], bool fullsc
 	return window;
 }
 
+//loads a GLSL shader with the given vertex shader file path and fragment shader file path
 GLuint GameEngine::LoadShaders(const char * vertex_file_path, const char * fragment_file_path)
 {
 	// Create the shaders
@@ -295,6 +319,7 @@ void GameEngine::SetUserFunc(CorrtexFunc userInit, CorrtexFuncf userUpdate)
 	this->UserUpdate = userUpdate;
 }
 
+//calculate a rough estimate of the current FPS of the engine
 void GameEngine::FPSCounter()
 {
 	// Measure speed
@@ -311,51 +336,74 @@ void GameEngine::FPSCounter()
 	}
 }
 
+//engine initialize function - currently automating the aspect ratio to 16:9.
 void GameEngine::Init()
 {
+	//set w:h to 16:9
 	width = 1600;
 	height = 900;
 	aspectRatio = (float)width / (float)height;
 
-
+	//create window and load default shaders
 	window = WindowInit(width, height, "Corrtex Engine Alpha v1.0", false);
 	programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+
+	//initialize the engine's lists of objects and lights
 	objectList = new LinkedList<CorrtexObject*>();
 	lights = new LinkedList<CorrtexLight*>();
-	//camera, input & model view projection matrix handle
+
+	//create a camera and set default camera position
 	camera = new CorrtexFPSCamera(0.01f, 2000.0f, aspectRatio, 50.0f);
 	camera->cameraPosition = vec3(-230, 150, -230);
-	input = new InputManager(window);
+
+	//create utility classes that are needed to manage certain things across the engine
+		//input manager
+		input = new InputManager(window);
+		//model loader
+		modelLoader = new ModelLoader();
+		//image loader
+		imageLoader = new BMPLoader();
+		//vertex buffer object indexer
+		vboIndexer = new VBOIndexer();
+	//end
+
+	//create default modelviewproject matrix uniform 
 	mvpUni = new ShaderUniform(Matrix4x4, programID, "MVP");
-	modelLoader = new ModelLoader();
-	imageLoader = new BMPLoader();
+
+	//create lights
 	light1 = new CorrtexLight(vec4(0, 0, 0, 0), 0.88f * vec3(1, 1, 1));
-	vboIndexer = new VBOIndexer();
+	CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 1 * vec3(0, 0, 1));//blue spot light
+	light2->coneAngle = 45.0f;
+
+	//setup fps
 	fpsLastTime = glfwGetTime();
 	fpsFrameNum = 0;
-	//CorrtexLight *light2 = new CorrtexLight(vec4(2, 3, 0, 1), 1 * vec3(0, 0, 1));//blue spot light
-	//light2->coneAngle = 45.0f;
-	//CorrtexLight *light3 = new CorrtexLight(vec4(1, 5, 2, 0), 1 * vec3(1, 1, 1));//white directional light
 
-
+	//now that engine resources have been initialized, call the user's initialize function
 	UserInit();
 
+	//now initialize all of the user's objects that were just created
 	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
 		objectList->Get(i)->Initialize();
 	}
 
+	//tell ourselves that we have successfully initialized the engine
 	initLoaded = true;
 }
 
+//main update method
 void GameEngine::Update()
 {
+	//update input & camera
 	input->UpdateFirst();
 	camera->Update(time, *input);
 
+	//update whatever the user has in their update
 	UserUpdate(time, frame);
 
+	//update all objects
 	int c = objectList->Count();
 	for (int i = 0; i < c; ++i)
 	{
@@ -363,6 +411,7 @@ void GameEngine::Update()
 	}
 }
 
+//updates the display
 void GameEngine::UpdateDisplay()
 {
 	//poll events and swap buffers
@@ -388,25 +437,29 @@ void GameEngine::UpdateDisplay()
 		glfwWindowShouldClose(window) != 0;
 }
 
+//draws the scene
 void GameEngine::DrawScene()
 {
+	//get ref to current frame buffer
 	int currentFrameBuffer;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFrameBuffer);
 
+	//write FPS, and do all nessecary OpenGL calls to clear the screen with correct depth
 	this->FPSCounter();
 	glClearColor(0.4f, 0.6f, 0.8f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
+
+	//use our current shader program
 	glUseProgram(programID);
 
+	//switch between wireframe and regular
 	if (this->wireframeOn)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	//camera->Update(time, *input);
 
 	//draw every object in the object list
 	int c = objectList->Count();
@@ -415,8 +468,10 @@ void GameEngine::DrawScene()
 		//get pointer to current object
 		CorrtexObject *o = objectList->Get(i);
 
+		//is this object not the actual water object? if it is, don't draw it to the frame buffer, or else it will get strange results
 		if (dynamic_cast<CorrtexWater*>(o) == nullptr)
 		{
+			//make sure we should render this object to the reflection of the water
 			if (currentFrameBuffer == 0 || o->renderOtherBuffers)
 			{
 				glUseProgram(programID);//set default shader for those objects without shaders
@@ -426,6 +481,7 @@ void GameEngine::DrawScene()
 	}
 }
 
+//creates a reflection of the scene and binds it to the reflection frame buffer, then draws the scene to that buffer.
 void GameEngine::DoReflection(float waterHeight)
 {
 	///////////////////////////////////////////////////////////////////////
@@ -450,6 +506,7 @@ void GameEngine::DoReflection(float waterHeight)
 	camera->cameraPosition.y += distance;
 }
 
+//creates a refraction of the scene and binds it to the refraction frame buffer, then draws the scene to that buffer.
 void GameEngine::DoRefraction(float waterHeight)
 {
 	///////////////////////////////////////////////////////////////////////
@@ -464,8 +521,8 @@ void GameEngine::DoRefraction(float waterHeight)
 	DrawScene();
 }
 
+//draw the frame buffer objects using refraction and reflection buffers
 bool setWater = false;
-
 void GameEngine::FBOObjectsDraw()
 {
 	//if we have water
@@ -490,6 +547,7 @@ void GameEngine::FBOObjectsDraw()
 		int sz = objectList->Count();
 		for (int i = 0; i < sz; ++i)
 		{
+			//update the textures of the water object if we havent yet
 			if (objectList->Get(i)->name == "WaterPlane")
 			{
 				objectList->Get(i)->material->UpdateTexture("tex", waterObject->reflectionTexture);
@@ -502,10 +560,13 @@ void GameEngine::FBOObjectsDraw()
 	}
 }
 
+//the run method - very simple
 void GameEngine::Run()
 {
+	//initialize everything
 	Init();
 
+	//while the game is still running
 	while (!gameOver)
 	{
 		//update func

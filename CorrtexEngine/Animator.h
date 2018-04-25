@@ -7,6 +7,7 @@
 
 class AnimatedModel;
 
+//animator class. This class is used to control the playing of animations for a given AnimatedModel.
 class Animator
 {
 public:
@@ -18,13 +19,13 @@ public:
 	void UpdateAnimation();
 	void PlayAnimation(Animation *ani);
 private:
+	//lots of mathmatically complicated stuff going on in these methods - some of it is currently broken.
 	void IncreaseAnimationTime();
 	std::map<char*, mat4> CalculateCurrentPose();
 	void ApplyPoseToJoints(std::map<char*, mat4> pose, Joint *joint, mat4 parentTransform);
 	void GetPreviousAndNextFrames(Keyframe *prev, Keyframe *next);
 	float CalculateProgression(Keyframe k1, Keyframe k2);
 	std::map<char*, mat4> InterpolatePoses(Keyframe k1, Keyframe k2, float lerp);
-	
 	std::map<char*, mat4> curPose;
 };
 

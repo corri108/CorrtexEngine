@@ -1,3 +1,6 @@
+//This is the User Game class - this is theoretically designed so that the user only has to touch this
+//class, and not have to dive into the engine at all.
+
 #include "stdafx.h"
 #include "Game.h"
 
@@ -11,16 +14,20 @@ Game::~Game()
 
 }
 
-void B1(CorrtexObject &co)
-{
+//create objects that you want to be able to move around / change in the Update method here.
 
-}
-
+//make a skysphere here so we can rotate it in update
 CorrtexMesh *skysphere = NULL;
 CorrtexMesh* water = NULL;
 CorrtexMesh* terrain = NULL;
 AnimatedModel* character = NULL;
 
+//testing a day / night cycle
+float v = 0.0005f;
+float lightX = 0.0f;
+int day = 1;
+
+//user init
 void Game::Init()
 {
 	//set wireframe mode to false
@@ -43,7 +50,6 @@ void Game::Init()
 	animatedShader->AddUniformsArray(Float4, "allLights", "pos", Float3, "allLights", "color", Float1, "allLights", "attenuation");
 	animatedShader->AddUniformsArray(Float1, "allLights", "coneAngle", Float3, "allLights", "coneDirection");
 
-
 	//water shader
 	CorrtexShader *waterShader = new CorrtexShader("WaterVertexShader.vertexshader", "WaterFragmentShader.fragmentshader");
 	waterShader->AddAttributes(VERTEX, UV, NORMAL);
@@ -56,7 +62,7 @@ void Game::Init()
 	waterShader->AddUniforms(Float1, "numLights", Float1, "shininess", Float3, "specularColor");
 	waterShader->AddUniforms(Texture, "depth", Float1, "nearPlane", Float1, "farPlane");
 
-	//multitextured terrain
+	//multitextured terrain shader
 	CorrtexShader *multitexturedTerrainShader = new CorrtexShader("MultitexturedTerrain.vertexshader", "MultitexturedTerrain.fragmentshader");
 	multitexturedTerrainShader->AddAttributes(VERTEX, UV, NORMAL);
 	multitexturedTerrainShader->AddAttributes(TANGENT, BITANGENT);
@@ -149,11 +155,11 @@ void Game::Init()
 	skysphereMat->AddTexture("tex", skysphereTex, 1);
 
 	CorrtexMaterial *waterMat = new CorrtexMaterial(0.1f, 0.2f, vec3(0.1f, 0.66f, 0.82f));
-	waterMat->AddTexture("tex", 0, 1);//doesnt matter what you put here because texture must be constantly updated - see GameEngine draw method
-	waterMat->AddTexture("tex2", 0, 2);//doesnt matter what you put here because texture must be constantly updated - see GameEngine draw method
+	waterMat->AddTexture("tex", 0, 1);
+	waterMat->AddTexture("tex2", 0, 2);
 	waterMat->AddTexture("dudv", dudvTexture, 3);
 	waterMat->AddTexture("normal", waterTexture_normal, 4);
-	waterMat->AddTexture("depth", 0, 5);//doesnt matter what you put here because texture must be constantly updated - see GameEngine draw method
+	waterMat->AddTexture("depth", 0, 5);
 	waterMat->uvScale = vec2(6, 6);
 	waterMat->useAlphaBlending = true;
 
@@ -164,16 +170,18 @@ void Game::Init()
 	//CREATE OBJECTS HERE
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
-	//create water object
+	//create water controller
 	CorrtexWater *cw = new CorrtexWater(vec3(0, 5, 0));
 
+	//create skysphere
 	skysphere = new CorrtexMesh(vec3(0, 0, 0), "Assets/skysphere.obj");
-	skysphere->SetScale(25);
+	skysphere->SetScaleUniform(25);
 	skysphere->SetShader(diffuseShader);
 	skysphere->SetMaterial(skysphereMat);
 	skysphere->useIndexing = false;
 	skysphere->name = "Skysphere";
 
+	//create terrain
 	terrain = new CorrtexMesh(vec3(0, -50, 0), "Assets/terrain2.obj");
 	terrain->SetShader(multitexturedTerrainShader);
 	terrain->SetMaterial(terrainGrassMaterial);
@@ -181,6 +189,7 @@ void Game::Init()
 	terrain->useIndexing = false;
 	terrain->name = "Terrain";
 
+	//create actual water mesh
 	water = new CorrtexMesh(vec3(0, -35, 0), "Assets/water_plane.obj");
 	water->SetShader(waterShader);
 	water->SetMaterial(waterMat);
@@ -190,18 +199,18 @@ void Game::Init()
 	water->renderOtherBuffers = false;
 	water->name = "WaterPlane";
 
+	//fooling around with bones & animation - isnt working quite yet.
 	character = new AnimatedModel(vec3(0, 10, 0), "Assets\\deer.dae");
-	//character->SetScale(10);
 	character->SetShader(animatedShader);
 	character->SetMaterial(playerMaterial);
 	character->useIndexing = false;
 	character->name = "Player";
 }
-float v = 0.0005f;
-float lightX = 0.0f;
-int day = 1;
+
+//user update
 void Game::Update(float time, int frame)
 {
+	//showing how to access input from engine - nice and easy using the scope operator
 	if (GameEngine::input->GetKey("Up", Down))
 	{
 		GameEngine::waterObject->waveSpeed += v;
@@ -227,8 +236,10 @@ void Game::Update(float time, int frame)
 		water->material->uvScale += v * 10;
 	}
 
-	//day night cycle
+	//day night cycle - rotate skysphere
 	skysphere->yaw = 0.00025;
+
+	//access the main light very easily using scope operator again
 	GameEngine::light1->lightPosition.x = sinf(time / 100.0f) * 10;
 	GameEngine::light1->lightPosition.y = cosf(time / 100.0f) * 10;
 
@@ -239,16 +250,7 @@ void Game::Update(float time, int frame)
 
 	lightX = GameEngine::light1->lightPosition.x;
 
+	//trigger wireframe on/off 
 	if (GameEngine::input->GetKey("1", Trigger))
 		GameEngine::wireframeOn = !GameEngine::wireframeOn;
-
-	if (GameEngine::input->GetKey("2", Trigger)) {
-	}
-
-	if (GameEngine::input->GetKey("3", Trigger)) {
-	}
-
-	if (GameEngine::input->GetKey("4", Trigger))
-		printf("strength: %f, speed: %f, uv:(%f, %f)\n", GameEngine::waterObject->waveStrength, GameEngine::waterObject->waveSpeed,
-			water->material->uvScale.x, water->material->uvScale.y);
 }

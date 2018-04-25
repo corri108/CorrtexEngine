@@ -2,6 +2,7 @@
 #include "CorrtexShader.h"
 #include "GameEngine.h"
 
+//shader ctor
 CorrtexShader::CorrtexShader(char *vertexFile, char *fragmentFile)
 {
 	this->vertexShaderFileName = vertexFile;
@@ -10,17 +11,17 @@ CorrtexShader::CorrtexShader(char *vertexFile, char *fragmentFile)
 
 	this->shaderID = GameEngine::LoadShaders(this->vertexShaderFileName, this->fragmentShaderFileName);
 }
-
+//dtor
 CorrtexShader::~CorrtexShader()
 {
 
 }
 
+//tons of different functions for adding Uniform variables to the shader.
 void CorrtexShader::AddUniform(ShaderUniform *uni)
 {
 	uniforms->Add(uni);
 }
-
 void CorrtexShader::AddUniform(ShaderUniformType type, char* glslName)
 {
 	uniforms->Add(new ShaderUniform(type, this->shaderID, glslName));
@@ -36,7 +37,7 @@ void CorrtexShader::AddUniforms(ShaderUniformType type1, char* glslName1, Shader
 	uniforms->Add(new ShaderUniform(type2, this->shaderID, glslName2));
 	uniforms->Add(new ShaderUniform(type3, this->shaderID, glslName3));
 }
-
+//add uniform arrays
 void CorrtexShader::AddUniformArray(ShaderUniformType type, char* structName, char* attribName)
 {
 	uniforms->Add(new ShaderUniform(type, this->shaderID, structName, attribName));
@@ -53,7 +54,7 @@ void CorrtexShader::AddUniformsArray(ShaderUniformType type1, char* structName1,
 	uniforms->Add(new ShaderUniform(type2, this->shaderID, structName2, attribName2));
 	uniforms->Add(new ShaderUniform(type3, this->shaderID, structName3, attribName3));
 }
-
+//add atrributes
 void CorrtexShader::AddAttribute(ShaderLayoutLocation layoutLocation)
 {
 	attributeList.push_back(layoutLocation);
@@ -69,7 +70,7 @@ void CorrtexShader::AddAttributes(ShaderLayoutLocation layoutLocation1, ShaderLa
 	attributeList.push_back(layoutLocation2);
 	attributeList.push_back(layoutLocation3);
 }
-
+//checkes to see if this shader has a given attribute
 bool CorrtexShader::HasAttribute(ShaderLayoutLocation att)
 {
 	int c = attributeList.size();
@@ -89,7 +90,6 @@ void CorrtexShader::UseShader()
 {
 	glUseProgram(shaderID);
 }
-
 LinkedList<ShaderUniform*> &CorrtexShader::GetUniforms()
 {
 	return *this->uniforms;

@@ -2,6 +2,7 @@
 #include <glm\ext.hpp>
 using namespace glm;
 
+//class to store JointTransform data, used for storing AnimatedModel data.
 class JointTransform
 {
 public:

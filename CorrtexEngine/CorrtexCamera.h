@@ -4,6 +4,7 @@
 
 using namespace glm;
 
+//base camera class for my Corrtex engine.
 class CorrtexCamera
 {
 public:

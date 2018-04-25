@@ -4,6 +4,7 @@
 
 using namespace glm;
 
+//class for storing Joint data - used for AnimatedModel
 class Joint
 {
 public:

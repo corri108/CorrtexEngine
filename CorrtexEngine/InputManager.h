@@ -3,6 +3,8 @@
 #include "glm/ext.hpp"
 
 using namespace glm;
+
+//3 different kinds of key presses
 enum KeyPress
 {
 	Down,
@@ -10,14 +12,20 @@ enum KeyPress
 	Release
 };
 
+//input manager class. used to gather all kinds of input from the user, for now is just keyboard and mouse,
+//but will hopefully be extended to accept XBox controllers, Playstaion controllers, and other kinds of input devices
 class InputManager
 {
 public:
 	InputManager();
 	InputManager(GLFWwindow *gameWindow);
 	~InputManager();
+
+	//call this before you update anything in the game engine
 	void UpdateFirst();
+	//call this after everything has been updated in the game engine
 	void UpdateLast();
+
 	vec2 GetMouseDelta();
 	GLFWwindow *thisWindow = NULL;
 	bool GetKey(const char* keyName, KeyPress press);

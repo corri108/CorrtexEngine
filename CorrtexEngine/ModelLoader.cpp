@@ -3,32 +3,31 @@
 
 using namespace glm;
 
+//helper class to load model files
+
+//ctor/dtor
 ModelLoader::ModelLoader()
 {
 
 }
-		
 ModelLoader::~ModelLoader()
 {
 
 }
 
-//conversion methods from assimp to glm
+//conversion methods from assimp (animation + math library) to glm
 vec2 toGLM(aiVector2D v)
 {
 	return vec2(v.x, v.y);
 }
-
 vec2 toGLM_tex(aiVector3D v)
 {
 	return vec2(v.x, v.y);
 }
-
 vec3 toGLM(aiVector3D v)
 {
 	return vec3(v.x, v.y, v.z);
 }
-
 mat4 toGLM(aiMatrix4x4 m)
 {
 	mat4 ret = mat4(1.0f);
@@ -55,6 +54,7 @@ mat4 toGLM(aiMatrix4x4 m)
 	return ret;
 }
 
+//loads a .obj file
 bool ModelLoader::LoadOBJ(const char *filePath,
 	vector<vec3> &out_vertices,
 	vector<vec2> &out_uvs,
@@ -168,14 +168,15 @@ bool ModelLoader::LoadOBJ(const char *filePath,
 
 	return true;
 }
-
+//loads a skinned model (doesn't work yet :( )
 bool ModelLoader::LoadSkinned(const char *filePath,
 	vector<vec3> &out_vertices,
 	vector<vec2> &out_uvs,
 	vector<vec3> &out_normals,
 	vector<ivec3> &jointIDs,
 	vector<vec3> &weights,
-	int *boneCount, int *rootBoneIndex, char **rootBoneName, mat4 *rootBoneBind)
+	int *boneCount, int *rootBoneIndex, char **rootBoneName, mat4 *rootBoneBind,
+	std::vector<Animation *> &animations)
 {
 	const aiScene * animatedModel = aiImportFile(filePath, aiProcessPreset_TargetRealtime_MaxQuality);
 	const char *error = aiGetErrorString();
@@ -262,7 +263,14 @@ bool ModelLoader::LoadSkinned(const char *filePath,
 
 	for (int i = 0; i < animCount; ++i)
 	{
-		animatedModel->mAnimations[i]->
+		float duration = (float)(animatedModel->mAnimations[i]->mDuration);
+		const char * aniName = animatedModel->mAnimations[i]->mName.C_Str();
+		int numChannels = animatedModel->mAnimations[i]->mNumChannels;
+
+		for (int c = 0; c < numChannels; ++c)
+		{
+			//animatedModel->mAnimations[i]->mChannels[c]->
+		}
 	}
 
 	printf("animation count: %d", animCount);

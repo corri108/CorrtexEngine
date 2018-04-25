@@ -2,6 +2,7 @@
 #include "CorrtexLight.h"
 #include "GameEngine.h"
 
+//light class.
 
 CorrtexLight::CorrtexLight():
 	CorrtexLight(vec4(0,0,0,1), vec3(1))

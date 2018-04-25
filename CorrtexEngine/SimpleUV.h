@@ -2,6 +2,7 @@
 
 #include "glew.h"
 
+//a class that just has pre-defined UV coordinates for basic primitives (like cubes)
 class SimpleUV
 {
 public:
@@ -21,6 +22,7 @@ SimpleUV::~SimpleUV()
 
 }
 
+//basic cube primitive UV data
 GLfloat *SimpleUV::GetCubeUVData()
 {
 	return new GLfloat[72]

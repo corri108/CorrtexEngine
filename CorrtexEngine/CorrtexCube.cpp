@@ -14,7 +14,7 @@ CorrtexCube::CorrtexCube(vec3 pos, float size)
 	//transform / matrix stuff
 	this->position = pos;
 	this->startingPosition = pos;
-	SetScale(size);
+	SetScaleUniform(size);
 	this->startingScale = vec3(size);
 	//vertex / drawing stuff
 	this->vertexCount = 36;

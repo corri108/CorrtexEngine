@@ -3,6 +3,7 @@
 #include <glm/ext.hpp>
 #include "CorrtexPrimitive.h"
 
+//simple tetrahedron primitive class
 class CorrtexTetrahedron : public CorrtexPrimitive
 {
 public:

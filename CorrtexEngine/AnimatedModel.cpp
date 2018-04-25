@@ -3,30 +3,38 @@
 #include "Animator.h"
 #include "GameEngine.h"
 
+//AnimatedModel class - not yet working all the way due to the Animator class having issues.
+
+//constructor - includes loading the skinned model
 AnimatedModel::AnimatedModel(vec3 pos, const char *filePath)
 {
 	int rootJointIndex;
 	char *rootJointName;
 	mat4 rootJointBind;
 
+	std::vector<Animation *> animations;
 	this->position = pos;
 	this->startingPosition = pos;
 	this->animator = new Animator(this);
 	GameEngine::modelLoader->LoadSkinned(filePath, this->vertices, this->uvs, this->normals, 
-		this->jointIDs, this->weights, &this->jointCount, &rootJointIndex, &rootJointName, &rootJointBind);
+		this->jointIDs, this->weights, &this->jointCount, &rootJointIndex, &rootJointName, &rootJointBind,
+		animations);
 
 	//this->jointCount = 1;
 	this->root = new Joint(rootJointIndex, rootJointName, rootJointBind);
 	this->root->CalculateInverseBind(mat4(1.0f));
 }
 
+//destructor - nothing here yet
 AnimatedModel::~AnimatedModel()
 {
 	
 }
 
+//init
 void AnimatedModel::Initialize()
 {
+	//base initialize - will add another thing herelater
 	CorrtexMesh::Initialize();
 }
 
@@ -38,6 +46,7 @@ mat4 *AnimatedModel::GetJointTransforms()
 	return jointMats;
 }
 
+//adds the updating of the animator to the inherited update method from CorrtexMesh
 void AnimatedModel::Update(float time)
 {
 	CorrtexMesh::Update(time);
@@ -56,6 +65,7 @@ void AnimatedModel::AddJoints(Joint *head, mat4* jointMatrices)
 	}
 }
 
+//sets the shader attributes of the extra buffers needed for this class (joint ids and weights)
 void AnimatedModel::SetShaderAttributes()
 {
 	if (jointIDs.size() > 0)
@@ -74,6 +84,7 @@ void AnimatedModel::SetShaderAttributes()
 	}
 }
 
+//generates the special buffers needed for animated models (joint ids and weights)
 void AnimatedModel::GenSpecialBuffers()
 {
 	if (jointIDs.size() > 0)

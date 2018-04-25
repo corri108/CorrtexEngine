@@ -1,6 +1,7 @@
 #pragma once
 #include "CorrtexPrimitive.h"
 
+//simple quad primitive
 class CorrtexQuad : public CorrtexPrimitive
 {
 public:

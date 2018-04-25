@@ -2,16 +2,17 @@
 #include "BMPLoader.h"
 
 
+//empty ctor / dtor
 BMPLoader::BMPLoader()
 {
 
 }
-
 BMPLoader::~BMPLoader()
 {
 
 }
 
+//loads a bitmap file and stores the location of the bitmap into a GLuint
 GLuint BMPLoader::LoadBMP(const char *filePath)
 {
 	//declare data

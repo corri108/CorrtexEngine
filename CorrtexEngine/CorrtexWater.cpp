@@ -2,6 +2,7 @@
 #include "CorrtexWater.h"
 #include "GameEngine.h"
 
+//ctor / dtor
 CorrtexWater::CorrtexWater(vec3 pos)
 {
 	this->position = pos;
@@ -18,13 +19,11 @@ CorrtexWater::CorrtexWater(vec3 pos)
 	//smaller waves values
 	//strength: 0.034000, speed: 0.090000, uv:(6.475080, 6.475080)
 }
-
 CorrtexWater::CorrtexWater() :
 	CorrtexWater(vec3(0))
 {
 
 }
-
 CorrtexWater::~CorrtexWater()
 {
 	glDeleteFramebuffers(1, &reflectionFrameBuffer);
@@ -35,6 +34,7 @@ CorrtexWater::~CorrtexWater()
 	glDeleteTextures(1, &refractionDepthTexture);
 }
 
+//generates special buffers
 void CorrtexWater::GenSpecialBuffers()
 {
 	//generate frame buffer objects
@@ -52,6 +52,7 @@ void CorrtexWater::GenSpecialBuffers()
 	GameEngine::UnbindCurrentFrameBuffer();
 }
 
+//update
 void CorrtexWater::Update(float time)
 {
 	CorrtexObject::Update(time);
@@ -64,11 +65,13 @@ void CorrtexWater::Update(float time)
 	}
 }
 
+//binds the current buffer to the reflection buffer
 void CorrtexWater::BindReflectionFrameBuffer()
 {
 	GameEngine::BindFrameBuffer(this->reflectionFrameBuffer, this->reflectionWidth, this->reflectionHeight);
 }
 
+//binds the current buffer to the refraction buffer
 void CorrtexWater::BindRefractionFrameBuffer()
 {
 	GameEngine::BindFrameBuffer(this->refractionFrameBuffer, this->refractionWidth, this->refractionHeight);

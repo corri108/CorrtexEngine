@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ctime>
 
+//just a wrapper for easy calls to the built-in c++ random number generation.
 class CorrtexRandom
 {
 public:

@@ -1,6 +1,7 @@
 #pragma once
 #include "glew.h"
 
+//helper class to load BMP files
 class BMPLoader
 {
 public:

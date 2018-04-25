@@ -1,6 +1,7 @@
 #pragma once
 #include "Keyframe.h"
 
+//class to store Animation data
 class Animation
 {
 public:

@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "CorrtexFPSCamera.h"
 
+//just a FPS version of CorrtexCamera - meaning you can rotate cam with mouse, 
+//and move like a FPS camera with WASD.
 
+//ctor
 CorrtexFPSCamera::CorrtexFPSCamera(float near, float far, float aspect, float fov) :
 	CorrtexCamera(near, far, aspect, fov)
 {
@@ -17,17 +20,19 @@ CorrtexFPSCamera::CorrtexFPSCamera(float near, float far, float aspect, float fo
 	this->rotation = mat4(1.0f);
 	this->translation = mat4(1.0f);
 }
-
+//dtor
 CorrtexFPSCamera::~CorrtexFPSCamera()
 {
 
 }
 
+//inverts pitch
 void CorrtexFPSCamera::InvertPitch()
 {
 	pitch = -pitch;
 }
 
+//update
 void CorrtexFPSCamera::Update(float time, InputManager &input)
 {
 	RotationInput(time, input);
@@ -50,6 +55,7 @@ void CorrtexFPSCamera::Update(float time, InputManager &input)
 	this->UpdateProjectionMatrix();
 }
 
+//rotate with mouse
 void CorrtexFPSCamera::RotationInput(float time, InputManager &input)
 {
 	vec2 mouseD = input.GetMouseDelta();
@@ -71,7 +77,7 @@ void CorrtexFPSCamera::RotationInput(float time, InputManager &input)
 			printf("YAW: %f, PITCH: %f\n", yaw, pitch);
 	}
 }
-
+//move with WASD
 void CorrtexFPSCamera::TranslationInput(float time, InputManager &input)
 {
 	float dx = 0.0f, dz = 0.0f;

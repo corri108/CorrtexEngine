@@ -5,6 +5,7 @@
 
 using namespace glm;
 
+//enum for handling different types of OpenGL uniform locations 
 enum ShaderUniformType
 {
 	Float1,
@@ -21,6 +22,8 @@ enum ShaderUniformType
 	Matrix4x4
 };
 
+//this class handles communicating between OpenGL, shaders, and the engine. it sets different
+//uniform locations that exist in shaders using OpenGL calls.
 class ShaderUniform
 {
 public:

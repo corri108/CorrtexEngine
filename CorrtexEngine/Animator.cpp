@@ -3,6 +3,9 @@
 #include "AnimatedModel.h"
 #include "GameEngine.h"
 
+//animator class - this class is complicated and not working yet totally correctly.
+
+
 Animator::Animator(AnimatedModel *m)
 {
 	this->model = m;
@@ -13,12 +16,14 @@ Animator::~Animator()
 
 }
 
+//plays a given animation
 void Animator::PlayAnimation(Animation *ani)
 {
 	this->animationTime = 0.0f;
 	this->currentAnimation = ani;
 }
 
+//updates current animation if it exists
 void Animator::UpdateAnimation()
 {
 	if (currentAnimation == NULL)
@@ -31,6 +36,7 @@ void Animator::UpdateAnimation()
 	ApplyPoseToJoints(curPose, model->root, mat4(1.0f));
 }
 
+//increases the animation time 
 void Animator::IncreaseAnimationTime()
 {
 	animationTime += GameEngine::timeStep;
@@ -41,6 +47,7 @@ void Animator::IncreaseAnimationTime()
 	}
 }
 
+//calculates the current pose, returning a hashmap of all the joint matrices
 std::map<char*, mat4> Animator::CalculateCurrentPose()
 {
 	Keyframe previous;
@@ -67,6 +74,7 @@ void Animator::ApplyPoseToJoints(std::map<char*, mat4> pose, Joint *joint, mat4 
 	joint->transform = current;
 }
 
+//gets the previous and the next keyframes
 void  Animator::GetPreviousAndNextFrames(Keyframe *prev, Keyframe *next)
 {
 	Keyframe *allFrames = currentAnimation->frames;
@@ -85,6 +93,7 @@ void  Animator::GetPreviousAndNextFrames(Keyframe *prev, Keyframe *next)
 	}
 }
 
+//calculates the progression between keyframe k1 and k2
 float  Animator::CalculateProgression(Keyframe k1, Keyframe k2)
 {
 	float totalTime = k2.timeStamp - k1.timeStamp;
@@ -92,6 +101,7 @@ float  Animator::CalculateProgression(Keyframe k1, Keyframe k2)
 	return currentTime / totalTime;
 }
 
+//interpolates entire poses between the given 2 keyframes and the lerp value.
 std::map<char*, mat4> Animator::InterpolatePoses(Keyframe k1, Keyframe k2, float lerp)
 {
 	std::map <char *, mat4 > pose;
